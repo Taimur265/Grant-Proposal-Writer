@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grant Proposal Writer Pro v7.0</title>
+    <title>Grant Proposal Writer Pro v8.0</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -59,9 +59,22 @@
             { code: 'CHF', symbol: 'CHF', name: 'Swiss Franc' },
             { code: 'SEK', symbol: 'kr', name: 'Swedish Krona' },
             { code: 'NOK', symbol: 'kr', name: 'Norwegian Krone' },
+            { code: 'DKK', symbol: 'kr', name: 'Danish Krone' },
             { code: 'JPY', symbol: '¥', name: 'Japanese Yen' },
             { code: 'AUD', symbol: 'A$', name: 'Australian Dollar' },
-            { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar' }
+            { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar' },
+            { code: 'NZD', symbol: 'NZ$', name: 'New Zealand Dollar' },
+            { code: 'ZAR', symbol: 'R', name: 'South African Rand' },
+            { code: 'KES', symbol: 'KSh', name: 'Kenyan Shilling' },
+            { code: 'NGN', symbol: '₦', name: 'Nigerian Naira' },
+            { code: 'INR', symbol: '₹', name: 'Indian Rupee' },
+            { code: 'BDT', symbol: '৳', name: 'Bangladeshi Taka' },
+            { code: 'PKR', symbol: '₨', name: 'Pakistani Rupee' },
+            { code: 'PHP', symbol: '₱', name: 'Philippine Peso' },
+            { code: 'IDR', symbol: 'Rp', name: 'Indonesian Rupiah' },
+            { code: 'MXN', symbol: 'MX$', name: 'Mexican Peso' },
+            { code: 'BRL', symbol: 'R$', name: 'Brazilian Real' },
+            { code: 'COP', symbol: 'COL$', name: 'Colombian Peso' }
         ];
 
         const PROPOSAL_TYPES = [
@@ -287,6 +300,31 @@
             const [vfmEffectiveness, setVfmEffectiveness] = useState('');
             const [vfmEquity, setVfmEquity] = useState('');
 
+            // Communication & Visibility
+            const [visibilityPlan, setVisibilityPlan] = useState('');
+            const [communicationChannels, setCommunicationChannels] = useState([]);
+            const [disseminationPlan, setDisseminationPlan] = useState('');
+
+            // Capacity Building
+            const [capacityBuilding, setCapacityBuilding] = useState([{ target: '', topic: '', method: '', participants: '' }]);
+
+            // Knowledge Management
+            const [lessonsLearned, setLessonsLearned] = useState('');
+            const [knowledgeProducts, setKnowledgeProducts] = useState('');
+
+            // Innovation
+            const [innovationStatement, setInnovationStatement] = useState('');
+            const [scalingPotential, setScalingPotential] = useState('');
+
+            // Safeguards
+            const [environmentalSafeguards, setEnvironmentalSafeguards] = useState('');
+            const [socialSafeguards, setSocialSafeguards] = useState('');
+            const [safeguardingPolicy, setSafeguardingPolicy] = useState('');
+
+            // Coordination
+            const [coordinationMechanisms, setCoordinationMechanisms] = useState('');
+            const [governmentAlignment, setGovernmentAlignment] = useState('');
+
             // Other
             const [selectedSDGs, setSelectedSDGs] = useState([]);
             const [deadline, setDeadline] = useState('');
@@ -299,12 +337,12 @@
 
             // Load/Save localStorage
             useEffect(() => {
-                const saved = localStorage.getItem('grantProposalData_v7');
+                const saved = localStorage.getItem('grantProposalData_v8');
                 if (saved) {
                     try {
                         const d = JSON.parse(saved);
                         Object.keys(d).forEach(k => {
-                            const setters = { manualContent: setManualContent, proposalType: setProposalType, selectedFunder: setSelectedFunder, projectTitle: setProjectTitle, currency: setCurrency, orgName: setOrgName, orgLocation: setOrgLocation, orgYearFounded: setOrgYearFounded, orgRegistration: setOrgRegistration, budgetRequest: setBudgetRequest, projectDuration: setProjectDuration, targetBeneficiaries: setTargetBeneficiaries, missionStatement: setMissionStatement, additionalContext: setAdditionalContext, targetCountries: setTargetCountries, teamMembers: setTeamMembers, partners: setPartners, pastProjects: setPastProjects, theoryOfChange: setTheoryOfChange, problemStatement: setProblemStatement, logFrameGoal: setLogFrameGoal, logFrameOutcomes: setLogFrameOutcomes, logFrameOutputs: setLogFrameOutputs, risks: setRisks, stakeholders: setStakeholders, meIndicators: setMeIndicators, evaluationScores: setEvaluationScores, budgetItems: setBudgetItems, costShare: setCostShare, costShareSource: setCostShareSource, workPlanItems: setWorkPlanItems, crossCuttingThemes: setCrossCuttingThemes, crossCuttingNotes: setCrossCuttingNotes, sustainabilityPlan: setSustainabilityPlan, proposalFormat: setProposalFormat, beneficiariesDirect: setBeneficiariesDirect, beneficiariesIndirect: setBeneficiariesIndirect, beneficiariesWomen: setBeneficiariesWomen, beneficiariesYouth: setBeneficiariesYouth, beneficiariesPwd: setBeneficiariesPwd, vfmEconomy: setVfmEconomy, vfmEfficiency: setVfmEfficiency, vfmEffectiveness: setVfmEffectiveness, vfmEquity: setVfmEquity, selectedSDGs: setSelectedSDGs, deadline: setDeadline, wordLimit: setWordLimit, checkedAttachments: setCheckedAttachments };
+                            const setters = { manualContent: setManualContent, proposalType: setProposalType, selectedFunder: setSelectedFunder, projectTitle: setProjectTitle, currency: setCurrency, orgName: setOrgName, orgLocation: setOrgLocation, orgYearFounded: setOrgYearFounded, orgRegistration: setOrgRegistration, budgetRequest: setBudgetRequest, projectDuration: setProjectDuration, targetBeneficiaries: setTargetBeneficiaries, missionStatement: setMissionStatement, additionalContext: setAdditionalContext, targetCountries: setTargetCountries, teamMembers: setTeamMembers, partners: setPartners, pastProjects: setPastProjects, theoryOfChange: setTheoryOfChange, problemStatement: setProblemStatement, logFrameGoal: setLogFrameGoal, logFrameOutcomes: setLogFrameOutcomes, logFrameOutputs: setLogFrameOutputs, risks: setRisks, stakeholders: setStakeholders, meIndicators: setMeIndicators, evaluationScores: setEvaluationScores, budgetItems: setBudgetItems, costShare: setCostShare, costShareSource: setCostShareSource, workPlanItems: setWorkPlanItems, crossCuttingThemes: setCrossCuttingThemes, crossCuttingNotes: setCrossCuttingNotes, sustainabilityPlan: setSustainabilityPlan, proposalFormat: setProposalFormat, beneficiariesDirect: setBeneficiariesDirect, beneficiariesIndirect: setBeneficiariesIndirect, beneficiariesWomen: setBeneficiariesWomen, beneficiariesYouth: setBeneficiariesYouth, beneficiariesPwd: setBeneficiariesPwd, vfmEconomy: setVfmEconomy, vfmEfficiency: setVfmEfficiency, vfmEffectiveness: setVfmEffectiveness, vfmEquity: setVfmEquity, visibilityPlan: setVisibilityPlan, communicationChannels: setCommunicationChannels, disseminationPlan: setDisseminationPlan, capacityBuilding: setCapacityBuilding, lessonsLearned: setLessonsLearned, knowledgeProducts: setKnowledgeProducts, innovationStatement: setInnovationStatement, scalingPotential: setScalingPotential, environmentalSafeguards: setEnvironmentalSafeguards, socialSafeguards: setSocialSafeguards, safeguardingPolicy: setSafeguardingPolicy, coordinationMechanisms: setCoordinationMechanisms, governmentAlignment: setGovernmentAlignment, selectedSDGs: setSelectedSDGs, deadline: setDeadline, wordLimit: setWordLimit, checkedAttachments: setCheckedAttachments };
                             if (setters[k] && d[k] !== undefined) setters[k](d[k]);
                         });
                     } catch (e) { console.log('Error loading'); }
@@ -312,9 +350,9 @@
             }, []);
 
             useEffect(() => {
-                const data = { manualContent, proposalType, selectedFunder, projectTitle, currency, orgName, orgLocation, orgYearFounded, orgRegistration, budgetRequest, projectDuration, targetBeneficiaries, missionStatement, additionalContext, targetCountries, teamMembers, partners, pastProjects, theoryOfChange, problemStatement, logFrameGoal, logFrameOutcomes, logFrameOutputs, risks, stakeholders, meIndicators, evaluationScores, budgetItems, costShare, costShareSource, workPlanItems, crossCuttingThemes, crossCuttingNotes, sustainabilityPlan, proposalFormat, beneficiariesDirect, beneficiariesIndirect, beneficiariesWomen, beneficiariesYouth, beneficiariesPwd, vfmEconomy, vfmEfficiency, vfmEffectiveness, vfmEquity, selectedSDGs, deadline, wordLimit, checkedAttachments };
-                localStorage.setItem('grantProposalData_v7', JSON.stringify(data));
-            }, [manualContent, proposalType, selectedFunder, projectTitle, currency, orgName, orgLocation, orgYearFounded, orgRegistration, budgetRequest, projectDuration, targetBeneficiaries, missionStatement, additionalContext, targetCountries, teamMembers, partners, pastProjects, theoryOfChange, problemStatement, logFrameGoal, logFrameOutcomes, logFrameOutputs, risks, stakeholders, meIndicators, evaluationScores, budgetItems, costShare, costShareSource, workPlanItems, crossCuttingThemes, crossCuttingNotes, sustainabilityPlan, proposalFormat, beneficiariesDirect, beneficiariesIndirect, beneficiariesWomen, beneficiariesYouth, beneficiariesPwd, vfmEconomy, vfmEfficiency, vfmEffectiveness, vfmEquity, selectedSDGs, deadline, wordLimit, checkedAttachments]);
+                const data = { manualContent, proposalType, selectedFunder, projectTitle, currency, orgName, orgLocation, orgYearFounded, orgRegistration, budgetRequest, projectDuration, targetBeneficiaries, missionStatement, additionalContext, targetCountries, teamMembers, partners, pastProjects, theoryOfChange, problemStatement, logFrameGoal, logFrameOutcomes, logFrameOutputs, risks, stakeholders, meIndicators, evaluationScores, budgetItems, costShare, costShareSource, workPlanItems, crossCuttingThemes, crossCuttingNotes, sustainabilityPlan, proposalFormat, beneficiariesDirect, beneficiariesIndirect, beneficiariesWomen, beneficiariesYouth, beneficiariesPwd, vfmEconomy, vfmEfficiency, vfmEffectiveness, vfmEquity, visibilityPlan, communicationChannels, disseminationPlan, capacityBuilding, lessonsLearned, knowledgeProducts, innovationStatement, scalingPotential, environmentalSafeguards, socialSafeguards, safeguardingPolicy, coordinationMechanisms, governmentAlignment, selectedSDGs, deadline, wordLimit, checkedAttachments };
+                localStorage.setItem('grantProposalData_v8', JSON.stringify(data));
+            }, [manualContent, proposalType, selectedFunder, projectTitle, currency, orgName, orgLocation, orgYearFounded, orgRegistration, budgetRequest, projectDuration, targetBeneficiaries, missionStatement, additionalContext, targetCountries, teamMembers, partners, pastProjects, theoryOfChange, problemStatement, logFrameGoal, logFrameOutcomes, logFrameOutputs, risks, stakeholders, meIndicators, evaluationScores, budgetItems, costShare, costShareSource, workPlanItems, crossCuttingThemes, crossCuttingNotes, sustainabilityPlan, proposalFormat, beneficiariesDirect, beneficiariesIndirect, beneficiariesWomen, beneficiariesYouth, beneficiariesPwd, vfmEconomy, vfmEfficiency, vfmEffectiveness, vfmEquity, visibilityPlan, communicationChannels, disseminationPlan, capacityBuilding, lessonsLearned, knowledgeProducts, innovationStatement, scalingPotential, environmentalSafeguards, socialSafeguards, safeguardingPolicy, coordinationMechanisms, governmentAlignment, selectedSDGs, deadline, wordLimit, checkedAttachments]);
 
             const handleFileSelect = (e) => {
                 Array.from(e.target.files).forEach(file => {
@@ -389,10 +427,12 @@
 
             const clearAll = () => {
                 if (window.confirm('Clear all data?')) {
-                    localStorage.removeItem('grantProposalData_v7');
+                    localStorage.removeItem('grantProposalData_v8');
                     window.location.reload();
                 }
             };
+
+            const COMMUNICATION_CHANNELS = ['Website', 'Social Media', 'Newsletter', 'Press Release', 'Reports', 'Events', 'Podcast', 'Video', 'Webinar', 'Community Meetings'];
 
             const generatePrompt = () => {
                 const docContent = inputMode === 'paste' ? manualContent : files.map(f => `--- ${f.name} ---\n${f.content}`).join('\n\n');
@@ -500,6 +540,31 @@ ${sustainabilityPlan.financial ? `**Financial:** ${sustainabilityPlan.financial}
 ${sustainabilityPlan.technical ? `**Technical:** ${sustainabilityPlan.technical}` : ''}
 ${sustainabilityPlan.exit ? `**Exit Strategy:** ${sustainabilityPlan.exit}` : ''}
 
+## INNOVATION & SCALING
+${innovationStatement ? `**Innovation:** ${innovationStatement}` : ''}
+${scalingPotential ? `**Scaling Potential:** ${scalingPotential}` : ''}
+
+## COORDINATION & ALIGNMENT
+${governmentAlignment ? `**Government/Policy Alignment:** ${governmentAlignment}` : ''}
+${coordinationMechanisms ? `**Coordination Mechanisms:** ${coordinationMechanisms}` : ''}
+
+## CAPACITY BUILDING
+${capacityBuilding.filter(c => c.target).map(c => `- **${c.target}**: ${c.topic} via ${c.method} (${c.participants} participants)`).join('\n') || 'Not specified'}
+
+## KNOWLEDGE MANAGEMENT
+${lessonsLearned ? `**Lessons Learned:** ${lessonsLearned}` : ''}
+${knowledgeProducts ? `**Knowledge Products:** ${knowledgeProducts}` : ''}
+
+## SAFEGUARDS
+${environmentalSafeguards ? `**Environmental:** ${environmentalSafeguards}` : ''}
+${socialSafeguards ? `**Social:** ${socialSafeguards}` : ''}
+${safeguardingPolicy ? `**PSEA/Child Protection:** ${safeguardingPolicy}` : ''}
+
+## COMMUNICATION & VISIBILITY
+${visibilityPlan ? `**Visibility Plan:** ${visibilityPlan}` : ''}
+${communicationChannels.length ? `**Channels:** ${communicationChannels.join(', ')}` : ''}
+${disseminationPlan ? `**Dissemination:** ${disseminationPlan}` : ''}
+
 ${additionalContext ? `## ADDITIONAL CONTEXT\n${additionalContext}` : ''}
 
 ## PROPOSAL REQUIREMENTS
@@ -596,7 +661,7 @@ Write the complete proposal. Make it compelling, evidence-based, and submission-
                 <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 text-white p-4">
                     <div className="max-w-6xl mx-auto">
                         <div className="text-center mb-4">
-                            <h1 className="text-2xl font-bold">Grant Proposal Writer Pro v7.0</h1>
+                            <h1 className="text-2xl font-bold">Grant Proposal Writer Pro v8.0</h1>
                             <div className="flex justify-center gap-3 mt-2 text-xs flex-wrap">
                                 <span className="bg-emerald-600/20 text-emerald-400 px-2 py-1 rounded-full">{getCompletionPercentage()}% Complete</span>
                                 {deadline && getDeadlineInfo() && <span className={`px-2 py-1 rounded-full ${getDeadlineInfo().days < 7 ? 'bg-red-600/20 text-red-400' : 'bg-blue-600/20 text-blue-400'}`}>{getDeadlineInfo().days}d left</span>}
@@ -723,6 +788,17 @@ Write the complete proposal. Make it compelling, evidence-based, and submission-
                                             ))}
                                         </div>
                                     </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+                                        <div>
+                                            <label className="block text-xs text-slate-400 mb-1">💡 Innovation Statement</label>
+                                            <textarea value={innovationStatement} onChange={e => setInnovationStatement(e.target.value)} placeholder="What's innovative about your approach? New methodology, technology, partnership model..." className="w-full h-20 bg-slate-700 rounded px-3 py-2 text-sm resize-y" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs text-slate-400 mb-1">📈 Scaling Potential</label>
+                                            <textarea value={scalingPotential} onChange={e => setScalingPotential(e.target.value)} placeholder="How could this be replicated or scaled? Geographic expansion, policy adoption..." className="w-full h-20 bg-slate-700 rounded px-3 py-2 text-sm resize-y" />
+                                        </div>
+                                    </div>
                                 </div>
                             )}
 
@@ -761,6 +837,18 @@ Write the complete proposal. Make it compelling, evidence-based, and submission-
                                         </div>
                                     ))}
                                     <button onClick={() => addItem(setPastProjects, { name: '', funder: '', amount: '', year: '', outcomes: '' })} className="text-indigo-400 text-xs">+ Add Project</button>
+
+                                    <h3 className="font-medium mt-4">🤝 Coordination & Alignment</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="block text-xs text-slate-400 mb-1">Government/Policy Alignment</label>
+                                            <textarea value={governmentAlignment} onChange={e => setGovernmentAlignment(e.target.value)} placeholder="How does this align with national development plans, policies, or government priorities?" className="w-full h-16 bg-slate-700 rounded px-2 py-1.5 text-xs resize-y" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs text-slate-400 mb-1">Coordination Mechanisms</label>
+                                            <textarea value={coordinationMechanisms} onChange={e => setCoordinationMechanisms(e.target.value)} placeholder="How will you coordinate with other actors? Working groups, clusters, regular meetings..." className="w-full h-16 bg-slate-700 rounded px-2 py-1.5 text-xs resize-y" />
+                                        </div>
+                                    </div>
 
                                     <textarea value={additionalContext} onChange={e => setAdditionalContext(e.target.value)} placeholder="Additional Context" className="w-full h-24 bg-slate-700 rounded px-3 py-2 text-sm resize-y" />
                                 </div>
@@ -830,6 +918,18 @@ Write the complete proposal. Make it compelling, evidence-based, and submission-
                                         </div>
                                     ))}
                                     <button onClick={() => addItem(setStakeholders, { name: '', type: '', interest: '', influence: '', engagement: '' })} className="text-indigo-400 text-xs">+ Add Stakeholder</button>
+
+                                    <h3 className="font-medium mt-4">🎓 Capacity Building Plan</h3>
+                                    {capacityBuilding.map((c, i) => (
+                                        <div key={i} className="grid grid-cols-1 md:grid-cols-5 gap-2 p-2 bg-slate-700/30 rounded">
+                                            <input type="text" value={c.target} onChange={e => updateItem(setCapacityBuilding, i, 'target', e.target.value)} placeholder="Target Group" className="bg-slate-700 rounded px-2 py-1.5 text-xs" />
+                                            <input type="text" value={c.topic} onChange={e => updateItem(setCapacityBuilding, i, 'topic', e.target.value)} placeholder="Training Topic" className="bg-slate-700 rounded px-2 py-1.5 text-xs" />
+                                            <input type="text" value={c.method} onChange={e => updateItem(setCapacityBuilding, i, 'method', e.target.value)} placeholder="Method (Workshop, Mentoring...)" className="bg-slate-700 rounded px-2 py-1.5 text-xs" />
+                                            <input type="text" value={c.participants} onChange={e => updateItem(setCapacityBuilding, i, 'participants', e.target.value)} placeholder="# Participants" className="bg-slate-700 rounded px-2 py-1.5 text-xs" />
+                                            {capacityBuilding.length > 1 && <button onClick={() => removeItem(setCapacityBuilding, i)} className="text-red-400 text-xs">Remove</button>}
+                                        </div>
+                                    ))}
+                                    <button onClick={() => addItem(setCapacityBuilding, { target: '', topic: '', method: '', participants: '' })} className="text-indigo-400 text-xs">+ Add Training</button>
                                 </div>
                             )}
 
@@ -971,6 +1071,18 @@ Write the complete proposal. Make it compelling, evidence-based, and submission-
                                             <span className={`text-xl font-bold ${getSelfEvaluationScore() >= 80 ? 'text-emerald-400' : getSelfEvaluationScore() >= 60 ? 'text-yellow-400' : 'text-red-400'}`}>{getSelfEvaluationScore()}%</span>
                                         </div>
                                     )}
+
+                                    <h3 className="font-medium mt-4">📚 Knowledge Management</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="block text-xs text-slate-400 mb-1">Lessons from Previous Projects</label>
+                                            <textarea value={lessonsLearned} onChange={e => setLessonsLearned(e.target.value)} placeholder="What lessons from similar projects will inform this work?" className="w-full h-20 bg-slate-700 rounded px-2 py-1.5 text-xs resize-y" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs text-slate-400 mb-1">Knowledge Products & Dissemination</label>
+                                            <textarea value={knowledgeProducts} onChange={e => setKnowledgeProducts(e.target.value)} placeholder="What knowledge products will be created? Case studies, toolkits, policy briefs, reports..." className="w-full h-20 bg-slate-700 rounded px-2 py-1.5 text-xs resize-y" />
+                                        </div>
+                                    </div>
                                 </div>
                             )}
 
@@ -1062,6 +1174,22 @@ Write the complete proposal. Make it compelling, evidence-based, and submission-
                                             <input type="text" value={vfmEquity} onChange={e => setVfmEquity(e.target.value)} placeholder="e.g., Targeting marginalized groups, disaggregated data..." className="w-full bg-slate-700 rounded px-2 py-1.5 text-xs" />
                                         </div>
                                     </div>
+
+                                    <h2 className="text-lg font-semibold mt-6">🛡️ Safeguards</h2>
+                                    <div className="space-y-2">
+                                        <div className="p-2 bg-slate-700/30 rounded">
+                                            <label className="block text-xs text-green-400 mb-1">Environmental Safeguards</label>
+                                            <textarea value={environmentalSafeguards} onChange={e => setEnvironmentalSafeguards(e.target.value)} placeholder="Environmental screening, climate risk assessment, do-no-harm, mitigation measures..." className="w-full h-16 bg-slate-700 rounded px-2 py-1.5 text-xs resize-y" />
+                                        </div>
+                                        <div className="p-2 bg-slate-700/30 rounded">
+                                            <label className="block text-xs text-green-400 mb-1">Social Safeguards</label>
+                                            <textarea value={socialSafeguards} onChange={e => setSocialSafeguards(e.target.value)} placeholder="Stakeholder engagement, grievance mechanisms, vulnerable groups protection, involuntary resettlement..." className="w-full h-16 bg-slate-700 rounded px-2 py-1.5 text-xs resize-y" />
+                                        </div>
+                                        <div className="p-2 bg-slate-700/30 rounded">
+                                            <label className="block text-xs text-green-400 mb-1">Safeguarding Policy (PSEA/Child Protection)</label>
+                                            <textarea value={safeguardingPolicy} onChange={e => setSafeguardingPolicy(e.target.value)} placeholder="Protection from Sexual Exploitation and Abuse policy, child safeguarding, reporting mechanisms..." className="w-full h-16 bg-slate-700 rounded px-2 py-1.5 text-xs resize-y" />
+                                        </div>
+                                    </div>
                                 </div>
                             )}
 
@@ -1085,6 +1213,26 @@ Write the complete proposal. Make it compelling, evidence-based, and submission-
                                         <div className="p-3 bg-slate-700/30 rounded">
                                             <label className="block text-xs text-emerald-400 mb-1">Exit Strategy</label>
                                             <textarea value={sustainabilityPlan.exit} onChange={e => setSustainabilityPlan({...sustainabilityPlan, exit: e.target.value})} placeholder="Phased transition plan, handover process, timeline for withdrawal..." className="w-full h-20 bg-slate-700 rounded px-2 py-1.5 text-xs resize-y" />
+                                        </div>
+                                    </div>
+
+                                    <h2 className="text-lg font-semibold mt-6">📢 Communication & Visibility</h2>
+                                    <div className="space-y-3">
+                                        <div>
+                                            <label className="block text-xs text-slate-400 mb-1">Visibility Plan</label>
+                                            <textarea value={visibilityPlan} onChange={e => setVisibilityPlan(e.target.value)} placeholder="How will you acknowledge the funder? Logo placement, media mentions, reports, events..." className="w-full h-16 bg-slate-700 rounded px-2 py-1.5 text-xs resize-y" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs text-slate-400 mb-1">Communication Channels</label>
+                                            <div className="flex flex-wrap gap-1">
+                                                {COMMUNICATION_CHANNELS.map(ch => (
+                                                    <button key={ch} onClick={() => setCommunicationChannels(p => p.includes(ch) ? p.filter(c => c !== ch) : [...p, ch])} className={`px-2 py-1 rounded text-xs ${communicationChannels.includes(ch) ? 'bg-indigo-600' : 'bg-slate-700'}`}>{ch}</button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs text-slate-400 mb-1">Dissemination Plan</label>
+                                            <textarea value={disseminationPlan} onChange={e => setDisseminationPlan(e.target.value)} placeholder="How will results and learnings be shared? Publications, conferences, communities of practice..." className="w-full h-16 bg-slate-700 rounded px-2 py-1.5 text-xs resize-y" />
                                         </div>
                                     </div>
                                 </div>
@@ -1113,6 +1261,17 @@ Write the complete proposal. Make it compelling, evidence-based, and submission-
                             {activeTab === 11 && (
                                 <div className="space-y-4">
                                     <h2 className="text-lg font-semibold">🚀 Generate Proposal</h2>
+
+                                    {getValidationWarnings().length > 0 && !generatedPrompt && (
+                                        <div className="bg-amber-900/20 border border-amber-500/30 rounded p-3">
+                                            <h4 className="text-amber-400 text-xs font-medium mb-2">⚠️ Validation Warnings ({getValidationWarnings().length})</h4>
+                                            <ul className="text-xs text-amber-300/80 space-y-1">
+                                                {getValidationWarnings().map((w, i) => <li key={i}>• {w}</li>)}
+                                            </ul>
+                                            <p className="text-xs text-slate-500 mt-2">You can still generate, but the proposal may be incomplete.</p>
+                                        </div>
+                                    )}
+
                                     {!generatedPrompt ? (
                                         <div className="text-center py-8">
                                             <button onClick={generatePrompt} className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-3 rounded-xl font-bold">Generate Grant Proposal Prompt</button>
@@ -1215,7 +1374,7 @@ EVALUATION CRITERIA:
                             </div>
                         )}
 
-                        <div className="text-center mt-6 text-slate-500 text-xs no-print">Grant Proposal Writer Pro v7.0 | Auto-saves</div>
+                        <div className="text-center mt-6 text-slate-500 text-xs no-print">Grant Proposal Writer Pro v8.0 | Auto-saves</div>
                     </div>
                 </div>
             );

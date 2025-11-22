@@ -1,26 +1,27 @@
-# Grant Proposal Writer Pro v5.0
+# Grant Proposal Writer Pro v8.0
 
 A professional-grade AI-powered tool for generating comprehensive, submission-ready grant proposals. Upload your grant documents and receive an expertly crafted prompt that leverages 30+ years of grant writing expertise to generate winning proposals.
 
-## What's New in v5.0
+## What's New in v8.0
 
 ### Major Enhancements
-- **SDG Alignment Selector** - Visual badges for all 17 Sustainable Development Goals
-- **Logical Framework Builder** - Goal, Outcomes, Indicators, Means of Verification, Assumptions
-- **Risk Matrix** - Likelihood x Impact assessment with mitigation strategies
-- **M&E Indicators Section** - Baseline, Target, Frequency, Data Source tracking
-- **Self-Evaluation Scorecard** - Rate your proposal against 6 weighted evaluation criteria
-- **Attachment Checklist** - Track 20 common required and optional attachments
-- **Deadline Countdown** - Visual countdown with color-coded urgency warnings
-- **Word/Page Limit Tracking** - Real-time word count monitoring
-- **21 Funder Presets** - Added Oak, Hewlett, MacArthur, GEF foundations
-- **8-Tab Workflow** - Documents → Organization → Team → LogFrame → M&E → Budget → Checklist → Output
+- **Innovation & Scaling Section** - Innovation statement and scaling potential
+- **Capacity Building Planner** - Target groups, training topics, methods, participants
+- **Knowledge Management** - Lessons learned and knowledge products planning
+- **Safeguards Section** - Environmental, social, and PSEA/child protection safeguards
+- **Communication & Visibility** - Visibility plan, channels, dissemination strategy
+- **Coordination & Alignment** - Government alignment and coordination mechanisms
+- **Validation Warnings** - Pre-generation warnings for incomplete sections
+- **22 Currencies** - Added 13 local currencies (KES, NGN, INR, BDT, PKR, PHP, IDR, etc.)
+- **27 Funder Presets** - Added Norad, Danida, SDC, AFD, AECID, IDRC, USDA
 
-### Enhanced AI Prompt
-- Common rejection reasons to avoid
-- Sector-specific excellence guidance
-- Cross-cutting themes integration
-- Quality standards checklist
+### v7.0 Features (Included)
+- Cross-cutting themes (8 themes with notes)
+- Sustainability plan builder (4 components)
+- Beneficiaries breakdown (direct/indirect with demographics)
+- Value for Money (4Es framework)
+- Proposal format selector (Full, Concept Note, LOI, EOI)
+- 12-tab workflow
 
 ## Features
 
@@ -33,7 +34,7 @@ A professional-grade AI-powered tool for generating comprehensive, submission-re
 ### 60+ Specialized Proposal Types
 
 **General**
-- Standard Grant, Pilot/Seed, Scaling/Expansion, Research, Capacity Building
+- Standard Grant, Pilot/Seed, Scaling/Expansion, Research, Capacity Building, Consortium
 
 **Climate & Environment**
 - Climate Adaptation, Climate Mitigation, Renewable Energy, WASH
@@ -70,16 +71,16 @@ A professional-grade AI-powered tool for generating comprehensive, submission-re
 - Arts & Culture, Media & Journalism, Sports & Recreation
 - Digital Transformation, Civic Tech
 
-### 21 Funder Presets
+### 27 Funder Presets
 
 | Funder | Key Requirements |
 |--------|------------------|
 | USAID | DUNS/UEI, SAM.gov, MEL plan, cost-share, environmental compliance |
 | European Union | PADOR, LogFrame, co-financing 10-20%, visibility requirements |
 | World Bank | Poverty reduction focus, economic analysis, procurement compliance |
-| Green Climate Fund | Climate impact, paradigm shift, ESS compliance, accredited entity |
-| Global Environment Facility | Focal area alignment, incremental cost reasoning, co-financing |
-| Bill & Melinda Gates Foundation | Innovation, scalability, measurable impact, milestone-based |
+| Green Climate Fund | Climate impact, paradigm shift, ESS compliance |
+| Global Environment Facility | Focal area alignment, incremental cost reasoning |
+| Bill & Melinda Gates Foundation | Innovation, scalability, measurable impact |
 | FCDO (UK) | Value for Money, Theory of Change, GESI analysis |
 | Sida (Sweden) | Results-Based Management, HRBA approach |
 | GIZ (Germany) | Capacity development focus, knowledge management |
@@ -88,83 +89,69 @@ A professional-grade AI-powered tool for generating comprehensive, submission-re
 | UN Agencies | UN framework alignment, HACT compliance |
 | Global Fund | Disease-specific, CCM endorsement, PUDR reporting |
 | GAVI | Immunization focus, sustainability transition |
-| Mastercard Foundation | Youth employment, Africa priority, systems change |
-| Ford Foundation | Social justice, systems change, flexible funding |
+| Mastercard Foundation | Youth employment, Africa priority |
+| Ford Foundation | Social justice, systems change |
 | Rockefeller Foundation | Innovation, resilience, equity |
 | Oak Foundation | Issue-specific alignment, learning focus |
-| Hewlett Foundation | Strategy alignment, outcome focus, OE support |
+| Hewlett Foundation | Strategy alignment, outcome focus |
 | MacArthur Foundation | Big bets approach, evidence-based |
+| Norad (Norway) | Results framework, anti-corruption |
+| Danida (Denmark) | HRBA, green growth |
+| SDC (Switzerland) | Conflict sensitivity, sustainability |
+| AFD (France) | Climate co-benefits, French language |
+| AECID (Spain) | LAC focus, Spanish language |
+| IDRC (Canada) | Research focus, gender integration |
+| USDA | Food security, agricultural focus |
 
-### Advanced Features
+### 12-Tab Workflow
 
-#### SDG Alignment
-- Visual badge selector for all 17 SDGs
-- Color-coded by official SDG colors
-- Multiple selection supported
+1. **📄 Docs** - Grant documents, proposal type, funder, SDGs, innovation
+2. **🏢 Org** - Organization details, beneficiaries, past projects, coordination
+3. **👥 Team** - Personnel, partners, stakeholders, capacity building
+4. **📜 ToC** - Problem statement, Theory of Change
+5. **📊 LogFrame** - Goal, outcomes, outputs, work plan
+6. **⚠️ Risk** - Risk matrix with likelihood, impact, mitigation
+7. **📈 M&E** - KPIs, self-evaluation, knowledge management
+8. **💰 Budget** - Line items, cost-share
+9. **🌍 Cross** - Cross-cutting themes, VfM (4Es), safeguards
+10. **♻️ Sustain** - Sustainability plan, communication & visibility
+11. **✅ Check** - Attachment checklist
+12. **🚀 Output** - Generate prompt with validation warnings
 
-#### Logical Framework Builder
-- Overall Objective/Goal
-- Multiple Outcomes with:
-  - Outcome statement
-  - Indicators
-  - Means of Verification
-  - Assumptions & Risks
+### Cross-Cutting Themes (8)
+- Gender Equality & Women Empowerment
+- Environmental Sustainability
+- Disability Inclusion
+- Youth Engagement
+- Conflict Sensitivity
+- Human Rights-Based Approach
+- Localization
+- Innovation & Technology
 
-#### Risk Matrix
-- Risk description
-- Likelihood rating (Low/Medium/High)
-- Impact rating (Low/Medium/High)
-- Mitigation strategies
+### Safeguards
+- Environmental safeguards (climate risk, do-no-harm)
+- Social safeguards (grievance mechanisms, vulnerable groups)
+- PSEA/Child protection policies
 
-#### M&E Indicators
-- Indicator description
-- Baseline value
-- Target value
-- Collection frequency
-- Data source
-
-#### Self-Evaluation Scorecard
-Rate your proposal on 6 criteria:
-| Criteria | Weight |
-|----------|--------|
-| Relevance & Alignment | 20% |
-| Technical Approach & Methodology | 25% |
-| Organizational Capacity | 15% |
-| Budget & Cost Effectiveness | 15% |
-| Expected Impact & Outcomes | 15% |
-| Sustainability | 10% |
-
-#### Attachment Checklist
-Track 20 common documents:
-- Organization Registration Certificate (Required)
-- Audited Financial Statements (Required)
-- CVs of Key Personnel (Required)
-- Logical Framework (Required)
-- Detailed Budget (Required)
-- Budget Narrative (Required)
-- Work Plan/Gantt Chart (Required)
-- And 13 more optional documents
+### 22 Currencies Supported
+USD, EUR, GBP, CHF, SEK, NOK, DKK, JPY, AUD, CAD, NZD, ZAR, KES, NGN, INR, BDT, PKR, PHP, IDR, MXN, BRL, COP
 
 ## How to Use
 
 1. **Open the HTML file** in any modern browser
-2. **Step 1 - Documents**: Paste your grant RFP/guidelines and select proposal type
-3. **Step 2 - Organization**: Enter your organization details
-4. **Step 3 - Team**: Add key personnel and partner organizations
-5. **Step 4 - LogFrame**: Build your logical framework with outcomes and risks
-6. **Step 5 - M&E**: Add indicators and complete self-evaluation
-7. **Step 6 - Budget**: Enter budget line items
-8. **Step 7 - Checklist**: Track required attachments
-9. **Step 8 - Output**: Generate and copy your prompt
-10. **Paste into Claude** and receive your complete proposal
-
-## Quick Reference Guides
-
-### Built-in Modals
-- **Grant Writing Tips**: 7 expert tips for winning proposals
-- **Sample RFP**: Example format with "Use This Sample" button
-- **LogFrame Guide**: Explains Goal → Outcomes → Outputs → Activities
-- **Budget Categories Guide**: Typical percentages and line items
+2. **Tab 1 - Documents**: Paste RFP/guidelines, select type/funder/SDGs
+3. **Tab 2 - Organization**: Enter org details and past experience
+4. **Tab 3 - Team**: Add personnel, partners, stakeholders, training plans
+5. **Tab 4 - ToC**: Write problem statement and Theory of Change
+6. **Tab 5 - LogFrame**: Build logical framework with outcomes and outputs
+7. **Tab 6 - Risk**: Add risks with likelihood, impact, mitigation
+8. **Tab 7 - M&E**: Add KPIs and complete self-evaluation
+9. **Tab 8 - Budget**: Enter budget line items
+10. **Tab 9 - Cross-cutting**: Select themes, add VfM, safeguards
+11. **Tab 10 - Sustainability**: Add sustainability and visibility plans
+12. **Tab 11 - Checklist**: Track required attachments
+13. **Tab 12 - Output**: Review warnings, generate prompt
+14. **Paste into Claude** and receive your complete proposal
 
 ## Technical Details
 
@@ -179,17 +166,19 @@ Track 20 common documents:
 | File | Description |
 |------|-------------|
 | `grant-proposal-writer.html` | Main application (standalone, no build required) |
-| `GrantProposalWriter.jsx` | React component for integration |
 | `README.md` | This documentation |
 
 ## Version History
 
 | Version | Key Features |
 |---------|--------------|
-| v5.0 | SDG alignment, LogFrame builder, Risk matrix, M&E indicators, Self-evaluation, Attachment checklist |
-| v4.0 | 60+ grant types, 16 funder presets, 5-step workflow, Key personnel, Budget framework |
-| v3.0 | Dark theme, Progress indicators, Auto-save, Sample RFP, 45+ grant types |
-| v2.0 | Tab navigation, Drag & drop, File preview, Character count, 33 grant types |
+| v8.0 | Innovation & scaling, capacity building, knowledge management, safeguards, communication & visibility, coordination, validation warnings, 22 currencies, 27 funders |
+| v7.0 | Cross-cutting themes, sustainability plan, beneficiaries breakdown, VfM (4Es), proposal format selector |
+| v6.0 | Theory of Change, stakeholder analysis, work plan, 130+ countries |
+| v5.0 | SDG alignment, LogFrame builder, Risk matrix, M&E indicators, Self-evaluation |
+| v4.0 | 60+ grant types, 16 funder presets, 5-step workflow |
+| v3.0 | Dark theme, Progress indicators, Auto-save, Sample RFP |
+| v2.0 | Tab navigation, Drag & drop, File preview |
 | v1.0 | Initial release with 24 grant types |
 
 ## License
