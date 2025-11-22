@@ -1,54 +1,67 @@
 # Grant Proposal Writer Pro
 
-A professional-grade AI-powered tool for generating comprehensive, submission-ready grant proposals. Upload your grant documents and receive an expertly crafted prompt that leverages 25+ years of grant writing expertise to generate winning proposals.
+A professional-grade AI-powered tool for generating comprehensive, submission-ready grant proposals. Upload your grant documents and receive an expertly crafted prompt that leverages 30+ years of grant writing expertise to generate winning proposals.
 
-## What's New in v3.0
+## What's New in v4.0
 
 ### Major Enhancements
-- **Professional Dark Theme UI** - Modern, polished interface
-- **Visual Progress Indicator** - Track your workflow with step indicators
-- **Auto-Save to LocalStorage** - Never lose your work
-- **Sample RFP Template** - See example format to guide your input
-- **Project Title Field** - Dedicated field for compelling titles
-- **Quick Generate Option** - Skip details for fast output
-- **Completion Percentage** - See how complete your application is
-- **Help Tooltips** - Contextual guidance throughout
-- **45+ Grant Types** - Expanded categories with subcategories
+- **60+ Grant Types** - Expanded across 7 categories with specialized subtypes
+- **16 Funder Presets** - USAID, EU, World Bank, GCF, Gates Foundation, and more
+- **5-Step Workflow** - Documents → Organization → Team & Partners → Budget → Output
+- **Key Personnel Section** - Add/remove team members with roles and qualifications
+- **Partner Organizations** - Document partnerships and collaboration mechanisms
+- **Budget Framework** - Line-item budget builder with categories and auto-calculation
+- **Budget Categories Guide** - Modal with common budget line items by category
+- **Grant Writing Tips** - Built-in expert guidance modal
+- **Enhanced 30+ Year Expertise Prompt** - Upgraded from 25+ years
+- **Common Rejection Reasons** - Prompt includes pitfalls to avoid
+- **Tab Animations** - Smooth transitions between steps
+- **Print Stylesheet** - Clean printing with `.no-print` elements hidden
 
-### Enhanced AI Prompt
-- **25+ Years Expertise** - Upgraded from 20+ years
-- **Grant Review Panel Experience** - USAID, EU, foundations
-- **Critical Analysis Phase** - Structured document analysis
-- **Sector-Specific Excellence** - Healthcare, Education, Climate, SME
-- **Quality Assurance Checklist** - Built-in verification
+### Funder Presets (16 Funders)
+| Funder | Key Requirements |
+|--------|------------------|
+| USAID | DUNS, SAM registration, MEL plan, cost-share, environmental compliance |
+| European Union | PADOR registration, LogFrame, 10-20% co-financing, visibility |
+| World Bank | Poverty focus, economic analysis, procurement compliance, safeguards |
+| Green Climate Fund | Climate impact, paradigm shift, country ownership, ESS compliance |
+| Gates Foundation | Global health/development, measurement, sustainability, scale |
+| DFID/FCDO | Value for Money, Theory of Change, adaptive management, GESI |
+| SIDA | Rights-based, environment/climate, conflict sensitivity |
+| GIZ | Technical cooperation, capacity building, German development policy |
+| JICA | Human security, infrastructure, technical cooperation |
+| KOICA | Korea partnership, economic development, knowledge sharing |
+| UN Agencies | UN values, human rights-based, joint programming |
+| Global Fund | HIV/AIDS/TB/Malaria, CCM, performance-based, PSM |
+| GAVI | Immunization, HSS, country co-financing, sustainability |
+| Mastercard Foundation | Young people Africa, dignified work, financial inclusion |
+| Ford Foundation | Social justice, inequality reduction, civic engagement |
+| Rockefeller Foundation | Innovation, resilience, food/health/energy systems |
 
 ## Features
 
-### 45+ Specialized Grant Types
+### 60+ Specialized Grant Types
 
 **General**
-- Standard Grant Proposal, Research Grant, Nonprofit Program, Community Development
+- Standard Grant Proposal, Pilot/Seed Grant, Scaling/Expansion Grant, Research Grant, Multi-Year Program
 
-**Climate & Environment**
-- Climate Initiative, Renewable Energy, Water & Sanitation, Environmental Conservation, Biodiversity Protection, Waste Management
+**Climate & Environment (10 types)**
+- Climate Adaptation, Climate Mitigation, Renewable Energy, Water & Sanitation, Environmental Conservation, Biodiversity Protection, Waste Management, Forestry & Reforestation, Ocean & Marine Conservation, Sustainable Agriculture
 
-**Business & Economic**
-- SME Development, Social Enterprise, Financial Inclusion, Tourism, Trade & Export, Startup & Innovation
+**Business & Economic (10 types)**
+- SME Development, Social Enterprise, Financial Inclusion/Microfinance, Tourism, Trade & Export, Startup & Innovation, Value Chain Development, Market Systems, Employment/Livelihood, Digital Economy
 
-**Education** (NEW subcategories)
-- K-12 Education, Higher Education, Vocational Training, STEM Education, Literacy Programs
+**Education (9 types)**
+- K-12 Education, Higher Education, Vocational Training, STEM Education, Literacy Programs, Girls Education, Inclusive Education, EdTech/Digital Learning, Teacher Training
 
-**Healthcare** (NEW subcategories)
-- Primary Healthcare, Maternal & Child Health, Mental Health, Disease Prevention, Nutrition & Food Security
+**Healthcare (10 types)**
+- Primary Healthcare, Maternal & Child Health, Mental Health, Disease Prevention, Nutrition & Food Security, HIV/AIDS Program, Digital Health/mHealth, Health Systems Strengthening, Community Health, WASH & Hygiene
 
-**Social Development**
-- Women Empowerment, Youth Development, Capacity Building, Governance & Democracy, Human Rights, Disability Inclusion, Refugee & Migration
+**Social Development (10 types)**
+- Women Empowerment, Youth Development, Capacity Building, Governance & Democracy, Human Rights, Disability Inclusion, Refugee & Migration, Child Protection, Gender-Based Violence, Social Protection
 
-**Infrastructure**
-- Agriculture Development, Infrastructure, Disaster Relief, Humanitarian Aid, Urban Development, Housing & Shelter, Rural Development
-
-**Other**
-- Arts & Culture, Sports & Recreation, Media & Journalism, Digital Transformation, Technology & Innovation
+**Infrastructure & Humanitarian (10+ types)**
+- Agriculture Development, Infrastructure, Disaster Relief, Humanitarian Aid, Urban Development, Housing & Shelter, Rural Development, Energy Access, Transportation, Emergency Response
 
 ### Professional Proposal Structure
 
@@ -63,6 +76,7 @@ The AI generates comprehensive proposals with:
 7. **Sustainability Plan** - Financial, institutional, technical sustainability, exit strategy
 8. **Budget & Narrative** - Line-item budget, cost-effectiveness, value for money
 9. **Partnerships** - Partner mapping, coordination mechanisms
+10. **Annexes** - Supporting documents, CVs, registration certificates
 
 ### Key Features
 
@@ -70,11 +84,15 @@ The AI generates comprehensive proposals with:
 |---------|-------------|
 | Auto-Save | Progress saved to browser automatically |
 | Sample RFP | View example format to guide your input |
+| Funder Presets | Pre-configured requirements for 16 major funders |
+| Team Builder | Add key personnel with roles and qualifications |
+| Partner Section | Document implementing and technical partners |
+| Budget Builder | Line-item budget with categories and auto-totaling |
 | Progress Tracking | Visual indicators show completion status |
-| Quick Generate | Skip organization details for rapid output |
-| Tooltips | Contextual help throughout the interface |
+| Grant Tips | Built-in expert writing guidance |
 | Dark Theme | Professional, modern appearance |
 | Mobile Responsive | Works on all device sizes |
+| Print Ready | Clean print stylesheet included |
 
 ## How to Use
 
@@ -83,15 +101,28 @@ The AI generates comprehensive proposals with:
 - **Upload Files**: Drag & drop or click to upload (.txt works best)
 - **View Sample**: See example RFP format for guidance
 
-### Step 2: Add Organization Details (Optional but Recommended)
+### Step 2: Add Organization Details
 - Project Title (creates compelling proposal title)
+- Select Grant Type (60+ specialized options)
+- Select Funder Preset (auto-fills compliance requirements)
 - Organization Name & Mission
 - Geographic Focus
 - Budget Request & Duration
 - Target Beneficiaries
 - Relevant Experience
 
-### Step 3: Generate & Use
+### Step 3: Add Team & Partners
+- **Key Personnel**: Add team members with names, roles, qualifications, time commitment
+- **Lead Organization**: Describe your organization's role
+- **Partner Organizations**: Add implementing and technical partners
+
+### Step 4: Build Budget Framework
+- Add budget line items by category
+- Include cost justification for each item
+- Auto-calculates total budget
+- Use Budget Categories Guide for common line items
+
+### Step 5: Generate & Use
 1. Click "Generate Proposal Prompt"
 2. Prompt auto-copies to clipboard
 3. Open [claude.ai](https://claude.ai)
@@ -102,17 +133,18 @@ The AI generates comprehensive proposals with:
 ```
 Grant-Proposal-Writer/
 ├── README.md                    # Documentation
-├── grant-proposal-writer.html   # Main application (v3.0)
+├── grant-proposal-writer.html   # Main application (v4.0)
 └── GrantProposalWriter.jsx      # React component version
 ```
 
 ## Tips for Best Results
 
 1. **Include Complete RFP**: Full text with eligibility, criteria, required sections
-2. **Add Evaluation Rubric**: If provided, include scoring criteria
-3. **Provide Project Title**: A compelling title improves the entire proposal
-4. **Fill Key Fields**: Budget, duration, beneficiaries help customize output
-5. **Review & Customize**: Use AI output as foundation, add specific data
+2. **Select Funder Preset**: Automatically includes funder-specific requirements
+3. **Add Key Personnel**: Team qualifications strengthen proposals
+4. **Document Partners**: Shows collaboration capacity
+5. **Build Detailed Budget**: Line-item budgets are more credible
+6. **Review & Customize**: Use AI output as foundation, add specific data
 
 ## Technical Requirements
 
@@ -122,7 +154,21 @@ Grant-Proposal-Writer/
 
 ## Changelog
 
-### v3.0 (Current)
+### v4.0 (Current)
+- 60+ grant types across 7 categories
+- 16 funder presets with specific requirements
+- 5-step workflow with smooth transitions
+- Key Personnel section (add/remove team members)
+- Partner Organizations section
+- Budget Framework with line items and auto-calculation
+- Budget Categories Guide modal
+- Grant Writing Tips modal
+- Enhanced 30+ year expertise prompt
+- Common rejection reasons in prompt
+- Tab animations
+- Print stylesheet
+
+### v3.0
 - Professional dark theme UI
 - Visual progress indicators
 - Auto-save to localStorage
