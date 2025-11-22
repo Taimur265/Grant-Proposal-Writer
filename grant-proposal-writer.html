@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grant Proposal Writer Pro v6.0</title>
+    <title>Grant Proposal Writer Pro v6.1</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -26,7 +26,7 @@
 <body>
     <div id="root"></div>
     <script type="text/babel">
-        const { useState, useRef, useCallback, useEffect } = React;
+        const { useState, useRef, useEffect } = React;
 
         const SDG_GOALS = [
             { id: 1, name: 'No Poverty', color: '#E5243B' },
@@ -260,7 +260,7 @@
                     try {
                         const d = JSON.parse(saved);
                         Object.keys(d).forEach(k => {
-                            const setters = { manualContent: setManualContent, proposalType: setProposalType, selectedFunder: setSelectedFunder, projectTitle: setProjectTitle, currency: setCurrency, orgName: setOrgName, orgLocation: setOrgLocation, orgYearFounded: setOrgYearFounded, orgRegistration: setOrgRegistration, budgetRequest: setBudgetRequest, projectDuration: setProjectDuration, targetBeneficiaries: setTargetBeneficiaries, missionStatement: setMissionStatement, additionalContext: setAdditionalContext, targetCountries: setTargetCountries, teamMembers: setTeamMembers, partners: setPartners, pastProjects: setPastProjects, theoryOfChange: setTheoryOfChange, problemStatement: setProblemStatement, logFrameGoal: setLogFrameGoal, logFrameOutcomes: setLogFrameOutcomes, logFrameOutputs: setLogFrameOutputs, risks: setRisks, stakeholders: setStakeholders, meIndicators: setMeIndicators, budgetItems: setBudgetItems, costShare: setCostShare, costShareSource: setCostShareSource, workPlanItems: setWorkPlanItems, selectedSDGs: setSelectedSDGs, deadline: setDeadline, wordLimit: setWordLimit, checkedAttachments: setCheckedAttachments };
+                            const setters = { manualContent: setManualContent, proposalType: setProposalType, selectedFunder: setSelectedFunder, projectTitle: setProjectTitle, currency: setCurrency, orgName: setOrgName, orgLocation: setOrgLocation, orgYearFounded: setOrgYearFounded, orgRegistration: setOrgRegistration, budgetRequest: setBudgetRequest, projectDuration: setProjectDuration, targetBeneficiaries: setTargetBeneficiaries, missionStatement: setMissionStatement, additionalContext: setAdditionalContext, targetCountries: setTargetCountries, teamMembers: setTeamMembers, partners: setPartners, pastProjects: setPastProjects, theoryOfChange: setTheoryOfChange, problemStatement: setProblemStatement, logFrameGoal: setLogFrameGoal, logFrameOutcomes: setLogFrameOutcomes, logFrameOutputs: setLogFrameOutputs, risks: setRisks, stakeholders: setStakeholders, meIndicators: setMeIndicators, evaluationScores: setEvaluationScores, budgetItems: setBudgetItems, costShare: setCostShare, costShareSource: setCostShareSource, workPlanItems: setWorkPlanItems, selectedSDGs: setSelectedSDGs, deadline: setDeadline, wordLimit: setWordLimit, checkedAttachments: setCheckedAttachments };
                             if (setters[k] && d[k] !== undefined) setters[k](d[k]);
                         });
                     } catch (e) { console.log('Error loading'); }
@@ -268,9 +268,9 @@
             }, []);
 
             useEffect(() => {
-                const data = { manualContent, proposalType, selectedFunder, projectTitle, currency, orgName, orgLocation, orgYearFounded, orgRegistration, budgetRequest, projectDuration, targetBeneficiaries, missionStatement, additionalContext, targetCountries, teamMembers, partners, pastProjects, theoryOfChange, problemStatement, logFrameGoal, logFrameOutcomes, logFrameOutputs, risks, stakeholders, meIndicators, budgetItems, costShare, costShareSource, workPlanItems, selectedSDGs, deadline, wordLimit, checkedAttachments };
+                const data = { manualContent, proposalType, selectedFunder, projectTitle, currency, orgName, orgLocation, orgYearFounded, orgRegistration, budgetRequest, projectDuration, targetBeneficiaries, missionStatement, additionalContext, targetCountries, teamMembers, partners, pastProjects, theoryOfChange, problemStatement, logFrameGoal, logFrameOutcomes, logFrameOutputs, risks, stakeholders, meIndicators, evaluationScores, budgetItems, costShare, costShareSource, workPlanItems, selectedSDGs, deadline, wordLimit, checkedAttachments };
                 localStorage.setItem('grantProposalData_v6', JSON.stringify(data));
-            }, [manualContent, proposalType, selectedFunder, projectTitle, currency, orgName, orgLocation, orgYearFounded, orgRegistration, budgetRequest, projectDuration, targetBeneficiaries, missionStatement, additionalContext, targetCountries, teamMembers, partners, pastProjects, theoryOfChange, problemStatement, logFrameGoal, logFrameOutcomes, logFrameOutputs, risks, stakeholders, meIndicators, budgetItems, costShare, costShareSource, workPlanItems, selectedSDGs, deadline, wordLimit, checkedAttachments]);
+            }, [manualContent, proposalType, selectedFunder, projectTitle, currency, orgName, orgLocation, orgYearFounded, orgRegistration, budgetRequest, projectDuration, targetBeneficiaries, missionStatement, additionalContext, targetCountries, teamMembers, partners, pastProjects, theoryOfChange, problemStatement, logFrameGoal, logFrameOutcomes, logFrameOutputs, risks, stakeholders, meIndicators, evaluationScores, budgetItems, costShare, costShareSource, workPlanItems, selectedSDGs, deadline, wordLimit, checkedAttachments]);
 
             const handleFileSelect = (e) => {
                 Array.from(e.target.files).forEach(file => {
@@ -480,7 +480,24 @@ Write the complete proposal. Make it compelling, evidence-based, and submission-
 
                 setGeneratedPrompt(prompt);
                 setActiveTab(9);
-                navigator.clipboard?.writeText(prompt).then(() => { setCopySuccess(true); setTimeout(() => setCopySuccess(false), 3000); });
+                try {
+                    navigator.clipboard?.writeText(prompt).then(() => {
+                        setCopySuccess(true);
+                        setTimeout(() => setCopySuccess(false), 3000);
+                    }).catch(() => {
+                        // Fallback for clipboard API failure
+                        const textarea = document.createElement('textarea');
+                        textarea.value = prompt;
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textarea);
+                        setCopySuccess(true);
+                        setTimeout(() => setCopySuccess(false), 3000);
+                    });
+                } catch (e) {
+                    console.log('Clipboard not available');
+                }
             };
 
             const tabs = ['📄 Docs', '🏢 Org', '👥 Team', '📜 ToC', '📊 LogFrame', '⚠️ Risk', '📈 M&E', '💰 Budget', '✅ Check', '🚀 Output'];
@@ -491,7 +508,7 @@ Write the complete proposal. Make it compelling, evidence-based, and submission-
                 <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 text-white p-4">
                     <div className="max-w-6xl mx-auto">
                         <div className="text-center mb-4">
-                            <h1 className="text-2xl font-bold">Grant Proposal Writer Pro v6.0</h1>
+                            <h1 className="text-2xl font-bold">Grant Proposal Writer Pro v6.1</h1>
                             <div className="flex justify-center gap-3 mt-2 text-xs flex-wrap">
                                 <span className="bg-emerald-600/20 text-emerald-400 px-2 py-1 rounded-full">{getCompletionPercentage()}% Complete</span>
                                 {deadline && getDeadlineInfo() && <span className={`px-2 py-1 rounded-full ${getDeadlineInfo().days < 7 ? 'bg-red-600/20 text-red-400' : 'bg-blue-600/20 text-blue-400'}`}>{getDeadlineInfo().days}d left</span>}
@@ -510,6 +527,7 @@ Write the complete proposal. Make it compelling, evidence-based, and submission-
                         <div className="flex justify-center gap-2 mb-4 no-print text-xs flex-wrap">
                             <button onClick={() => setShowModal('tips')} className="bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 rounded">💡 Tips</button>
                             <button onClick={() => setShowModal('sample')} className="bg-blue-600 hover:bg-blue-500 px-3 py-1.5 rounded">📋 Sample</button>
+                            <button onClick={() => setShowModal('logframe')} className="bg-purple-600 hover:bg-purple-500 px-3 py-1.5 rounded">📊 LogFrame</button>
                             <button onClick={() => setShowModal('budget')} className="bg-amber-600 hover:bg-amber-500 px-3 py-1.5 rounded">💰 Budget</button>
                             <button onClick={clearAll} className="bg-red-600/20 text-red-400 px-3 py-1.5 rounded">🗑️ Clear</button>
                         </div>
@@ -791,23 +809,25 @@ Write the complete proposal. Make it compelling, evidence-based, and submission-
                                 <div className="space-y-4">
                                     <h2 className="text-lg font-semibold">⚠️ Risk Matrix</h2>
                                     {risks.map((r, i) => (
-                                        <div key={i} className="grid grid-cols-1 md:grid-cols-5 gap-2 p-2 bg-slate-700/30 rounded">
-                                            <input type="text" value={r.risk} onChange={e => updateItem(setRisks, i, 'risk', e.target.value)} placeholder="Risk" className="bg-slate-700 rounded px-2 py-1.5 text-xs md:col-span-2" />
-                                            <select value={r.likelihood} onChange={e => updateItem(setRisks, i, 'likelihood', e.target.value)} className="bg-slate-700 rounded px-2 py-1.5 text-xs">
-                                                <option value="low">Low</option>
-                                                <option value="medium">Medium</option>
-                                                <option value="high">High</option>
-                                            </select>
-                                            <select value={r.impact} onChange={e => updateItem(setRisks, i, 'impact', e.target.value)} className="bg-slate-700 rounded px-2 py-1.5 text-xs">
-                                                <option value="low">Low</option>
-                                                <option value="medium">Medium</option>
-                                                <option value="high">High</option>
-                                            </select>
-                                            {risks.length > 1 && <button onClick={() => removeItem(setRisks, i)} className="text-red-400 text-xs">Remove</button>}
+                                        <div key={i} className="p-3 bg-slate-700/30 rounded space-y-2">
+                                            <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+                                                <input type="text" value={r.risk} onChange={e => updateItem(setRisks, i, 'risk', e.target.value)} placeholder="Risk Description" className="bg-slate-700 rounded px-2 py-1.5 text-xs md:col-span-2" />
+                                                <select value={r.likelihood} onChange={e => updateItem(setRisks, i, 'likelihood', e.target.value)} className="bg-slate-700 rounded px-2 py-1.5 text-xs">
+                                                    <option value="low">Low Likelihood</option>
+                                                    <option value="medium">Medium Likelihood</option>
+                                                    <option value="high">High Likelihood</option>
+                                                </select>
+                                                <select value={r.impact} onChange={e => updateItem(setRisks, i, 'impact', e.target.value)} className="bg-slate-700 rounded px-2 py-1.5 text-xs">
+                                                    <option value="low">Low Impact</option>
+                                                    <option value="medium">Medium Impact</option>
+                                                    <option value="high">High Impact</option>
+                                                </select>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <input type="text" value={r.mitigation} onChange={e => updateItem(setRisks, i, 'mitigation', e.target.value)} placeholder="Mitigation Strategy" className="flex-1 bg-slate-700 rounded px-2 py-1.5 text-xs" />
+                                                {risks.length > 1 && <button onClick={() => removeItem(setRisks, i)} className="text-red-400 text-xs px-2">Remove</button>}
+                                            </div>
                                         </div>
-                                    ))}
-                                    {risks.filter(r => r.risk).map((r, i) => (
-                                        <input key={i} type="text" value={r.mitigation} onChange={e => updateItem(setRisks, risks.findIndex(x => x.risk === r.risk), 'mitigation', e.target.value)} placeholder={`Mitigation: ${r.risk.slice(0,30)}...`} className="w-full bg-slate-700 rounded px-2 py-1.5 text-xs" />
                                     ))}
                                     <button onClick={() => addItem(setRisks, { risk: '', likelihood: 'medium', impact: 'medium', mitigation: '' })} className="text-indigo-400 text-xs">+ Add Risk</button>
                                 </div>
@@ -926,6 +946,7 @@ Write the complete proposal. Make it compelling, evidence-based, and submission-
                                             <div className="flex gap-2 mt-3">
                                                 <button onClick={() => { navigator.clipboard.writeText(generatedPrompt); setCopySuccess(true); setTimeout(() => setCopySuccess(false), 3000); }} className="flex-1 bg-indigo-600 py-2 rounded text-sm">📋 Copy</button>
                                                 <button onClick={() => { const b = new Blob([generatedPrompt], {type:'text/plain'}); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'grant-prompt.txt'; a.click(); }} className="bg-slate-700 px-4 py-2 rounded text-sm">💾 Download</button>
+                                                <button onClick={() => setGeneratedPrompt('')} className="bg-amber-600 hover:bg-amber-500 px-4 py-2 rounded text-sm">🔄 New</button>
                                             </div>
                                         </div>
                                     )}
@@ -983,6 +1004,20 @@ EVALUATION CRITERIA:
                                             <button onClick={() => { setManualContent(`REQUEST FOR PROPOSALS\nWomen's Economic Empowerment Program\n\nFUNDER: Example Foundation\nBUDGET: $200,000 - $500,000\nDURATION: 24-36 months\n\nOBJECTIVES:\n1. Increase women's income by 30%\n2. Establish 50 women-led enterprises\n3. Create savings groups reaching 1,000 women\n\nEVALUATION CRITERIA:\n- Technical Approach (30%)\n- Organizational Capacity (25%)\n- Cost Effectiveness (20%)\n- Innovation (15%)\n- Sustainability (10%)`); setShowModal(null); setActiveTab(0); }} className="mt-3 w-full bg-emerald-600 py-2 rounded text-sm">Use Sample</button>
                                         </>
                                     )}
+                                    {showModal === 'logframe' && (
+                                        <>
+                                            <h3 className="text-lg font-bold mb-3">📊 LogFrame Guide</h3>
+                                            <div className="space-y-2 text-xs">
+                                                <div className="bg-slate-700/50 p-2 rounded"><strong className="text-purple-400">Goal (Impact)</strong><p className="text-slate-400">Long-term change the project contributes to. Example: "Reduced poverty among rural women"</p></div>
+                                                <div className="bg-slate-700/50 p-2 rounded"><strong className="text-purple-400">Outcomes</strong><p className="text-slate-400">Medium-term results by end of project. Example: "Women have increased income from enterprises"</p></div>
+                                                <div className="bg-slate-700/50 p-2 rounded"><strong className="text-purple-400">Outputs</strong><p className="text-slate-400">Direct deliverables of activities. Example: "500 women trained in business skills"</p></div>
+                                                <div className="bg-slate-700/50 p-2 rounded"><strong className="text-purple-400">Activities</strong><p className="text-slate-400">What you will do. Example: "Conduct 20 business training workshops"</p></div>
+                                                <div className="bg-slate-700/50 p-2 rounded"><strong className="text-purple-400">Indicators</strong><p className="text-slate-400">How you measure success. Must be SMART: Specific, Measurable, Achievable, Relevant, Time-bound</p></div>
+                                                <div className="bg-slate-700/50 p-2 rounded"><strong className="text-purple-400">Means of Verification</strong><p className="text-slate-400">Data sources: Surveys, Reports, Registers, Photos, Interviews</p></div>
+                                                <div className="bg-slate-700/50 p-2 rounded"><strong className="text-purple-400">Assumptions</strong><p className="text-slate-400">External factors that must hold true for success</p></div>
+                                            </div>
+                                        </>
+                                    )}
                                     {showModal === 'budget' && (
                                         <>
                                             <h3 className="text-lg font-bold mb-3">💰 Budget Guide</h3>
@@ -1001,7 +1036,7 @@ EVALUATION CRITERIA:
                             </div>
                         )}
 
-                        <div className="text-center mt-6 text-slate-500 text-xs no-print">Grant Proposal Writer Pro v6.0 | Auto-saves</div>
+                        <div className="text-center mt-6 text-slate-500 text-xs no-print">Grant Proposal Writer Pro v6.1 | Auto-saves</div>
                     </div>
                 </div>
             );
