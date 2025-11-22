@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grant Proposal Writer Pro v6.1</title>
+    <title>Grant Proposal Writer Pro v7.0</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -150,7 +150,32 @@
             { value: 'rockefeller', label: 'Rockefeller Foundation', requirements: 'Innovation, resilience, equity, partnership' },
             { value: 'oak', label: 'Oak Foundation', requirements: 'Issue-specific, learning focus, core support friendly' },
             { value: 'hewlett', label: 'Hewlett Foundation', requirements: 'Strategy alignment, outcome focus, OE support' },
-            { value: 'macarthur', label: 'MacArthur Foundation', requirements: 'Big bets, systems change, evidence-based' }
+            { value: 'macarthur', label: 'MacArthur Foundation', requirements: 'Big bets, systems change, evidence-based' },
+            { value: 'norad', label: 'Norad (Norway)', requirements: 'Results framework, anti-corruption, partner assessment' },
+            { value: 'danida', label: 'Danida (Denmark)', requirements: 'HRBA, green growth, partnerships' },
+            { value: 'sdc', label: 'SDC (Switzerland)', requirements: 'Conflict sensitivity, sustainability, Swiss added value' },
+            { value: 'afd', label: 'AFD (France)', requirements: 'Climate co-benefits, French language, safeguards' },
+            { value: 'aecid', label: 'AECID (Spain)', requirements: 'LAC focus, Spanish language, HRBA' },
+            { value: 'idrc', label: 'IDRC (Canada)', requirements: 'Research focus, gender integration, open access' },
+            { value: 'usda', label: 'USDA', requirements: 'Food security, agricultural focus, US partner often required' }
+        ];
+
+        const CROSS_CUTTING_THEMES = [
+            { id: 'gender', label: 'Gender Equality & Women Empowerment', description: 'GESI analysis, sex-disaggregated data' },
+            { id: 'environment', label: 'Environmental Sustainability', description: 'Climate resilience, do-no-harm' },
+            { id: 'disability', label: 'Disability Inclusion', description: 'Accessibility, PWD participation' },
+            { id: 'youth', label: 'Youth Engagement', description: 'Meaningful youth participation' },
+            { id: 'conflict', label: 'Conflict Sensitivity', description: 'Do-no-harm, peace lens' },
+            { id: 'hrba', label: 'Human Rights-Based Approach', description: 'Rights holders, duty bearers' },
+            { id: 'localization', label: 'Localization', description: 'Local ownership, capacity strengthening' },
+            { id: 'innovation', label: 'Innovation & Technology', description: 'Digital solutions, adaptive approaches' }
+        ];
+
+        const PROPOSAL_FORMATS = [
+            { value: 'full', label: 'Full Proposal' },
+            { value: 'concept', label: 'Concept Note' },
+            { value: 'loi', label: 'Letter of Intent' },
+            { value: 'expression', label: 'Expression of Interest' }
         ];
 
         const EVALUATION_CRITERIA = [
@@ -243,6 +268,25 @@
             // Work Plan
             const [workPlanItems, setWorkPlanItems] = useState([{ activity: '', q1: false, q2: false, q3: false, q4: false, responsible: '' }]);
 
+            // Cross-cutting & Sustainability
+            const [crossCuttingThemes, setCrossCuttingThemes] = useState([]);
+            const [crossCuttingNotes, setCrossCuttingNotes] = useState({});
+            const [sustainabilityPlan, setSustainabilityPlan] = useState({ institutional: '', financial: '', technical: '', exit: '' });
+            const [proposalFormat, setProposalFormat] = useState('full');
+
+            // Beneficiaries
+            const [beneficiariesDirect, setBeneficiariesDirect] = useState('');
+            const [beneficiariesIndirect, setBeneficiariesIndirect] = useState('');
+            const [beneficiariesWomen, setBeneficiariesWomen] = useState('');
+            const [beneficiariesYouth, setBeneficiariesYouth] = useState('');
+            const [beneficiariesPwd, setBeneficiariesPwd] = useState('');
+
+            // Value for Money
+            const [vfmEconomy, setVfmEconomy] = useState('');
+            const [vfmEfficiency, setVfmEfficiency] = useState('');
+            const [vfmEffectiveness, setVfmEffectiveness] = useState('');
+            const [vfmEquity, setVfmEquity] = useState('');
+
             // Other
             const [selectedSDGs, setSelectedSDGs] = useState([]);
             const [deadline, setDeadline] = useState('');
@@ -255,12 +299,12 @@
 
             // Load/Save localStorage
             useEffect(() => {
-                const saved = localStorage.getItem('grantProposalData_v6');
+                const saved = localStorage.getItem('grantProposalData_v7');
                 if (saved) {
                     try {
                         const d = JSON.parse(saved);
                         Object.keys(d).forEach(k => {
-                            const setters = { manualContent: setManualContent, proposalType: setProposalType, selectedFunder: setSelectedFunder, projectTitle: setProjectTitle, currency: setCurrency, orgName: setOrgName, orgLocation: setOrgLocation, orgYearFounded: setOrgYearFounded, orgRegistration: setOrgRegistration, budgetRequest: setBudgetRequest, projectDuration: setProjectDuration, targetBeneficiaries: setTargetBeneficiaries, missionStatement: setMissionStatement, additionalContext: setAdditionalContext, targetCountries: setTargetCountries, teamMembers: setTeamMembers, partners: setPartners, pastProjects: setPastProjects, theoryOfChange: setTheoryOfChange, problemStatement: setProblemStatement, logFrameGoal: setLogFrameGoal, logFrameOutcomes: setLogFrameOutcomes, logFrameOutputs: setLogFrameOutputs, risks: setRisks, stakeholders: setStakeholders, meIndicators: setMeIndicators, evaluationScores: setEvaluationScores, budgetItems: setBudgetItems, costShare: setCostShare, costShareSource: setCostShareSource, workPlanItems: setWorkPlanItems, selectedSDGs: setSelectedSDGs, deadline: setDeadline, wordLimit: setWordLimit, checkedAttachments: setCheckedAttachments };
+                            const setters = { manualContent: setManualContent, proposalType: setProposalType, selectedFunder: setSelectedFunder, projectTitle: setProjectTitle, currency: setCurrency, orgName: setOrgName, orgLocation: setOrgLocation, orgYearFounded: setOrgYearFounded, orgRegistration: setOrgRegistration, budgetRequest: setBudgetRequest, projectDuration: setProjectDuration, targetBeneficiaries: setTargetBeneficiaries, missionStatement: setMissionStatement, additionalContext: setAdditionalContext, targetCountries: setTargetCountries, teamMembers: setTeamMembers, partners: setPartners, pastProjects: setPastProjects, theoryOfChange: setTheoryOfChange, problemStatement: setProblemStatement, logFrameGoal: setLogFrameGoal, logFrameOutcomes: setLogFrameOutcomes, logFrameOutputs: setLogFrameOutputs, risks: setRisks, stakeholders: setStakeholders, meIndicators: setMeIndicators, evaluationScores: setEvaluationScores, budgetItems: setBudgetItems, costShare: setCostShare, costShareSource: setCostShareSource, workPlanItems: setWorkPlanItems, crossCuttingThemes: setCrossCuttingThemes, crossCuttingNotes: setCrossCuttingNotes, sustainabilityPlan: setSustainabilityPlan, proposalFormat: setProposalFormat, beneficiariesDirect: setBeneficiariesDirect, beneficiariesIndirect: setBeneficiariesIndirect, beneficiariesWomen: setBeneficiariesWomen, beneficiariesYouth: setBeneficiariesYouth, beneficiariesPwd: setBeneficiariesPwd, vfmEconomy: setVfmEconomy, vfmEfficiency: setVfmEfficiency, vfmEffectiveness: setVfmEffectiveness, vfmEquity: setVfmEquity, selectedSDGs: setSelectedSDGs, deadline: setDeadline, wordLimit: setWordLimit, checkedAttachments: setCheckedAttachments };
                             if (setters[k] && d[k] !== undefined) setters[k](d[k]);
                         });
                     } catch (e) { console.log('Error loading'); }
@@ -268,9 +312,9 @@
             }, []);
 
             useEffect(() => {
-                const data = { manualContent, proposalType, selectedFunder, projectTitle, currency, orgName, orgLocation, orgYearFounded, orgRegistration, budgetRequest, projectDuration, targetBeneficiaries, missionStatement, additionalContext, targetCountries, teamMembers, partners, pastProjects, theoryOfChange, problemStatement, logFrameGoal, logFrameOutcomes, logFrameOutputs, risks, stakeholders, meIndicators, evaluationScores, budgetItems, costShare, costShareSource, workPlanItems, selectedSDGs, deadline, wordLimit, checkedAttachments };
-                localStorage.setItem('grantProposalData_v6', JSON.stringify(data));
-            }, [manualContent, proposalType, selectedFunder, projectTitle, currency, orgName, orgLocation, orgYearFounded, orgRegistration, budgetRequest, projectDuration, targetBeneficiaries, missionStatement, additionalContext, targetCountries, teamMembers, partners, pastProjects, theoryOfChange, problemStatement, logFrameGoal, logFrameOutcomes, logFrameOutputs, risks, stakeholders, meIndicators, evaluationScores, budgetItems, costShare, costShareSource, workPlanItems, selectedSDGs, deadline, wordLimit, checkedAttachments]);
+                const data = { manualContent, proposalType, selectedFunder, projectTitle, currency, orgName, orgLocation, orgYearFounded, orgRegistration, budgetRequest, projectDuration, targetBeneficiaries, missionStatement, additionalContext, targetCountries, teamMembers, partners, pastProjects, theoryOfChange, problemStatement, logFrameGoal, logFrameOutcomes, logFrameOutputs, risks, stakeholders, meIndicators, evaluationScores, budgetItems, costShare, costShareSource, workPlanItems, crossCuttingThemes, crossCuttingNotes, sustainabilityPlan, proposalFormat, beneficiariesDirect, beneficiariesIndirect, beneficiariesWomen, beneficiariesYouth, beneficiariesPwd, vfmEconomy, vfmEfficiency, vfmEffectiveness, vfmEquity, selectedSDGs, deadline, wordLimit, checkedAttachments };
+                localStorage.setItem('grantProposalData_v7', JSON.stringify(data));
+            }, [manualContent, proposalType, selectedFunder, projectTitle, currency, orgName, orgLocation, orgYearFounded, orgRegistration, budgetRequest, projectDuration, targetBeneficiaries, missionStatement, additionalContext, targetCountries, teamMembers, partners, pastProjects, theoryOfChange, problemStatement, logFrameGoal, logFrameOutcomes, logFrameOutputs, risks, stakeholders, meIndicators, evaluationScores, budgetItems, costShare, costShareSource, workPlanItems, crossCuttingThemes, crossCuttingNotes, sustainabilityPlan, proposalFormat, beneficiariesDirect, beneficiariesIndirect, beneficiariesWomen, beneficiariesYouth, beneficiariesPwd, vfmEconomy, vfmEfficiency, vfmEffectiveness, vfmEquity, selectedSDGs, deadline, wordLimit, checkedAttachments]);
 
             const handleFileSelect = (e) => {
                 Array.from(e.target.files).forEach(file => {
@@ -317,8 +361,26 @@
             };
 
             const toggleSDG = (id) => setSelectedSDGs(p => p.includes(id) ? p.filter(s => s !== id) : [...p, id]);
+            const toggleCrossCutting = (id) => setCrossCuttingThemes(p => p.includes(id) ? p.filter(s => s !== id) : [...p, id]);
             const addCountry = (c) => { if (c && !targetCountries.includes(c)) { setTargetCountries([...targetCountries, c]); setCountrySearch(''); } };
             const removeCountry = (c) => setTargetCountries(targetCountries.filter(x => x !== c));
+
+            const getValidationWarnings = () => {
+                const warnings = [];
+                if (!manualContent && files.length === 0) warnings.push('No grant documents provided');
+                if (!projectTitle) warnings.push('Project title missing');
+                if (!orgName) warnings.push('Organization name missing');
+                if (!budgetRequest) warnings.push('Budget request missing');
+                if (!problemStatement) warnings.push('Problem statement missing');
+                if (!theoryOfChange) warnings.push('Theory of Change missing');
+                if (!logFrameGoal) warnings.push('LogFrame goal missing');
+                if (!logFrameOutcomes.some(o => o.outcome)) warnings.push('No outcomes defined');
+                if (!risks.some(r => r.risk)) warnings.push('No risks identified');
+                if (!meIndicators.some(m => m.indicator)) warnings.push('No M&E indicators');
+                if (!budgetItems.some(b => b.item)) warnings.push('No budget items');
+                if (crossCuttingThemes.length === 0) warnings.push('No cross-cutting themes selected');
+                return warnings;
+            };
 
             // Array helpers
             const addItem = (setter, template) => setter(p => [...p, template]);
@@ -327,7 +389,7 @@
 
             const clearAll = () => {
                 if (window.confirm('Clear all data?')) {
-                    localStorage.removeItem('grantProposalData_v6');
+                    localStorage.removeItem('grantProposalData_v7');
                     window.location.reload();
                 }
             };
@@ -412,6 +474,32 @@ ${budgetItems.filter(b => b.item).map(b => `- [${b.category || 'Other'}] ${b.ite
 **Total:** ${sym}${getTotalBudget().toLocaleString()}
 ${costShare ? `**Cost-Share:** ${sym}${costShare}` : ''}
 
+${proposalFormat !== 'full' ? `## PROPOSAL FORMAT: ${PROPOSAL_FORMATS.find(f => f.value === proposalFormat)?.label || 'Full Proposal'}\n` : ''}
+## BENEFICIARIES BREAKDOWN
+${beneficiariesDirect ? `**Direct Beneficiaries:** ${beneficiariesDirect}` : ''}
+${beneficiariesIndirect ? `**Indirect Beneficiaries:** ${beneficiariesIndirect}` : ''}
+${beneficiariesWomen ? `**Women/Girls:** ${beneficiariesWomen}%` : ''}
+${beneficiariesYouth ? `**Youth (15-35):** ${beneficiariesYouth}%` : ''}
+${beneficiariesPwd ? `**Persons with Disabilities:** ${beneficiariesPwd}%` : ''}
+
+## CROSS-CUTTING THEMES
+${crossCuttingThemes.length ? crossCuttingThemes.map(id => {
+    const theme = CROSS_CUTTING_THEMES.find(t => t.id === id);
+    return `- **${theme?.label}**: ${crossCuttingNotes[id] || theme?.description || 'TBD'}`;
+}).join('\n') : 'Not specified'}
+
+## VALUE FOR MONEY (4Es)
+${vfmEconomy ? `**Economy:** ${vfmEconomy}` : ''}
+${vfmEfficiency ? `**Efficiency:** ${vfmEfficiency}` : ''}
+${vfmEffectiveness ? `**Effectiveness:** ${vfmEffectiveness}` : ''}
+${vfmEquity ? `**Equity:** ${vfmEquity}` : ''}
+
+## SUSTAINABILITY PLAN
+${sustainabilityPlan.institutional ? `**Institutional:** ${sustainabilityPlan.institutional}` : ''}
+${sustainabilityPlan.financial ? `**Financial:** ${sustainabilityPlan.financial}` : ''}
+${sustainabilityPlan.technical ? `**Technical:** ${sustainabilityPlan.technical}` : ''}
+${sustainabilityPlan.exit ? `**Exit Strategy:** ${sustainabilityPlan.exit}` : ''}
+
 ${additionalContext ? `## ADDITIONAL CONTEXT\n${additionalContext}` : ''}
 
 ## PROPOSAL REQUIREMENTS
@@ -479,7 +567,7 @@ Before writing, identify:
 Write the complete proposal. Make it compelling, evidence-based, and submission-ready.`;
 
                 setGeneratedPrompt(prompt);
-                setActiveTab(9);
+                setActiveTab(11);
                 try {
                     navigator.clipboard?.writeText(prompt).then(() => {
                         setCopySuccess(true);
@@ -500,7 +588,7 @@ Write the complete proposal. Make it compelling, evidence-based, and submission-
                 }
             };
 
-            const tabs = ['📄 Docs', '🏢 Org', '👥 Team', '📜 ToC', '📊 LogFrame', '⚠️ Risk', '📈 M&E', '💰 Budget', '✅ Check', '🚀 Output'];
+            const tabs = ['📄 Docs', '🏢 Org', '👥 Team', '📜 ToC', '📊 LogFrame', '⚠️ Risk', '📈 M&E', '💰 Budget', '🌍 Cross', '♻️ Sustain', '✅ Check', '🚀 Output'];
 
             const filteredCountries = COUNTRIES.filter(c => c.toLowerCase().includes(countrySearch.toLowerCase()) && !targetCountries.includes(c));
 
@@ -508,7 +596,7 @@ Write the complete proposal. Make it compelling, evidence-based, and submission-
                 <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 text-white p-4">
                     <div className="max-w-6xl mx-auto">
                         <div className="text-center mb-4">
-                            <h1 className="text-2xl font-bold">Grant Proposal Writer Pro v6.1</h1>
+                            <h1 className="text-2xl font-bold">Grant Proposal Writer Pro v7.0</h1>
                             <div className="flex justify-center gap-3 mt-2 text-xs flex-wrap">
                                 <span className="bg-emerald-600/20 text-emerald-400 px-2 py-1 rounded-full">{getCompletionPercentage()}% Complete</span>
                                 {deadline && getDeadlineInfo() && <span className={`px-2 py-1 rounded-full ${getDeadlineInfo().days < 7 ? 'bg-red-600/20 text-red-400' : 'bg-blue-600/20 text-blue-400'}`}>{getDeadlineInfo().days}d left</span>}
@@ -537,7 +625,13 @@ Write the complete proposal. Make it compelling, evidence-based, and submission-
                             {activeTab === 0 && (
                                 <div className="space-y-4">
                                     <h2 className="text-lg font-semibold">📄 Grant Documents</h2>
-                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                                    <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+                                        <div>
+                                            <label className="block text-xs text-slate-400 mb-1">Format *</label>
+                                            <select value={proposalFormat} onChange={e => setProposalFormat(e.target.value)} className="w-full bg-slate-700 rounded px-3 py-2 text-sm">
+                                                {PROPOSAL_FORMATS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
+                                            </select>
+                                        </div>
                                         <div>
                                             <label className="block text-xs text-slate-400 mb-1">Type *</label>
                                             <select value={proposalType} onChange={e => setProposalType(e.target.value)} className="w-full bg-slate-700 rounded px-3 py-2 text-sm">
@@ -644,7 +738,15 @@ Write the complete proposal. Make it compelling, evidence-based, and submission-
                                         <input type="text" value={budgetRequest} onChange={e => setBudgetRequest(e.target.value)} placeholder={`Budget Request (${currency}) *`} className="bg-slate-700 rounded px-3 py-2 text-sm" />
                                         <input type="text" value={projectDuration} onChange={e => setProjectDuration(e.target.value)} placeholder="Duration (e.g., 24 months)" className="bg-slate-700 rounded px-3 py-2 text-sm" />
                                     </div>
-                                    <input type="text" value={targetBeneficiaries} onChange={e => setTargetBeneficiaries(e.target.value)} placeholder="Target Beneficiaries" className="w-full bg-slate-700 rounded px-3 py-2 text-sm" />
+                                    <h3 className="font-medium mt-4">Beneficiaries Breakdown</h3>
+                                    <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                                        <input type="text" value={beneficiariesDirect} onChange={e => setBeneficiariesDirect(e.target.value)} placeholder="Direct #" className="bg-slate-700 rounded px-2 py-1.5 text-xs" />
+                                        <input type="text" value={beneficiariesIndirect} onChange={e => setBeneficiariesIndirect(e.target.value)} placeholder="Indirect #" className="bg-slate-700 rounded px-2 py-1.5 text-xs" />
+                                        <input type="text" value={beneficiariesWomen} onChange={e => setBeneficiariesWomen(e.target.value)} placeholder="Women %" className="bg-slate-700 rounded px-2 py-1.5 text-xs" />
+                                        <input type="text" value={beneficiariesYouth} onChange={e => setBeneficiariesYouth(e.target.value)} placeholder="Youth %" className="bg-slate-700 rounded px-2 py-1.5 text-xs" />
+                                        <input type="text" value={beneficiariesPwd} onChange={e => setBeneficiariesPwd(e.target.value)} placeholder="PWD %" className="bg-slate-700 rounded px-2 py-1.5 text-xs" />
+                                    </div>
+                                    <input type="text" value={targetBeneficiaries} onChange={e => setTargetBeneficiaries(e.target.value)} placeholder="Target Beneficiaries Description" className="w-full bg-slate-700 rounded px-3 py-2 text-sm" />
                                     <textarea value={missionStatement} onChange={e => setMissionStatement(e.target.value)} placeholder="Mission Statement" className="w-full h-20 bg-slate-700 rounded px-3 py-2 text-sm resize-y" />
 
                                     <h3 className="font-medium mt-4">Previous Experience</h3>
@@ -911,8 +1013,85 @@ Write the complete proposal. Make it compelling, evidence-based, and submission-
                                 </div>
                             )}
 
-                            {/* Tab 8: Checklist */}
+                            {/* Tab 8: Cross-cutting & VfM */}
                             {activeTab === 8 && (
+                                <div className="space-y-4">
+                                    <h2 className="text-lg font-semibold">🌍 Cross-cutting Themes</h2>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                        {CROSS_CUTTING_THEMES.map(t => (
+                                            <label key={t.id} className={`flex items-start gap-2 p-2 rounded cursor-pointer text-xs ${crossCuttingThemes.includes(t.id) ? 'bg-emerald-900/30' : 'bg-slate-700/30'}`}>
+                                                <input type="checkbox" checked={crossCuttingThemes.includes(t.id)} onChange={() => toggleCrossCutting(t.id)} className="mt-1" />
+                                                <div>
+                                                    <span className={crossCuttingThemes.includes(t.id) ? 'text-emerald-400 font-medium' : 'font-medium'}>{t.label}</span>
+                                                    <p className="text-slate-500 text-xs">{t.description}</p>
+                                                </div>
+                                            </label>
+                                        ))}
+                                    </div>
+                                    {crossCuttingThemes.length > 0 && (
+                                        <div className="space-y-2">
+                                            <h3 className="font-medium text-sm">Notes for selected themes:</h3>
+                                            {crossCuttingThemes.map(id => {
+                                                const theme = CROSS_CUTTING_THEMES.find(t => t.id === id);
+                                                return (
+                                                    <div key={id} className="p-2 bg-slate-700/30 rounded">
+                                                        <label className="block text-xs text-indigo-400 mb-1">{theme?.label}</label>
+                                                        <input type="text" value={crossCuttingNotes[id] || ''} onChange={e => setCrossCuttingNotes({...crossCuttingNotes, [id]: e.target.value})} placeholder={`How will you address ${theme?.label}?`} className="w-full bg-slate-700 rounded px-2 py-1.5 text-xs" />
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+
+                                    <h2 className="text-lg font-semibold mt-6">💎 Value for Money (4Es)</h2>
+                                    <div className="space-y-2">
+                                        <div className="p-2 bg-slate-700/30 rounded">
+                                            <label className="block text-xs text-amber-400 mb-1">Economy - Are inputs purchased at the right price?</label>
+                                            <input type="text" value={vfmEconomy} onChange={e => setVfmEconomy(e.target.value)} placeholder="e.g., Competitive procurement, local sourcing..." className="w-full bg-slate-700 rounded px-2 py-1.5 text-xs" />
+                                        </div>
+                                        <div className="p-2 bg-slate-700/30 rounded">
+                                            <label className="block text-xs text-amber-400 mb-1">Efficiency - How well are inputs converted to outputs?</label>
+                                            <input type="text" value={vfmEfficiency} onChange={e => setVfmEfficiency(e.target.value)} placeholder="e.g., Cost per beneficiary, staff ratios..." className="w-full bg-slate-700 rounded px-2 py-1.5 text-xs" />
+                                        </div>
+                                        <div className="p-2 bg-slate-700/30 rounded">
+                                            <label className="block text-xs text-amber-400 mb-1">Effectiveness - Are outputs achieving outcomes?</label>
+                                            <input type="text" value={vfmEffectiveness} onChange={e => setVfmEffectiveness(e.target.value)} placeholder="e.g., % targets achieved, quality measures..." className="w-full bg-slate-700 rounded px-2 py-1.5 text-xs" />
+                                        </div>
+                                        <div className="p-2 bg-slate-700/30 rounded">
+                                            <label className="block text-xs text-amber-400 mb-1">Equity - Are benefits distributed fairly?</label>
+                                            <input type="text" value={vfmEquity} onChange={e => setVfmEquity(e.target.value)} placeholder="e.g., Targeting marginalized groups, disaggregated data..." className="w-full bg-slate-700 rounded px-2 py-1.5 text-xs" />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Tab 9: Sustainability */}
+                            {activeTab === 9 && (
+                                <div className="space-y-4">
+                                    <h2 className="text-lg font-semibold">♻️ Sustainability Plan</h2>
+                                    <div className="space-y-3">
+                                        <div className="p-3 bg-slate-700/30 rounded">
+                                            <label className="block text-xs text-emerald-400 mb-1">Institutional Sustainability</label>
+                                            <textarea value={sustainabilityPlan.institutional} onChange={e => setSustainabilityPlan({...sustainabilityPlan, institutional: e.target.value})} placeholder="How will institutions/systems continue after funding? Local ownership, policy integration, capacity transfer..." className="w-full h-20 bg-slate-700 rounded px-2 py-1.5 text-xs resize-y" />
+                                        </div>
+                                        <div className="p-3 bg-slate-700/30 rounded">
+                                            <label className="block text-xs text-emerald-400 mb-1">Financial Sustainability</label>
+                                            <textarea value={sustainabilityPlan.financial} onChange={e => setSustainabilityPlan({...sustainabilityPlan, financial: e.target.value})} placeholder="How will activities be funded after the grant? Revenue generation, government budget, other donors..." className="w-full h-20 bg-slate-700 rounded px-2 py-1.5 text-xs resize-y" />
+                                        </div>
+                                        <div className="p-3 bg-slate-700/30 rounded">
+                                            <label className="block text-xs text-emerald-400 mb-1">Technical Sustainability</label>
+                                            <textarea value={sustainabilityPlan.technical} onChange={e => setSustainabilityPlan({...sustainabilityPlan, technical: e.target.value})} placeholder="How will technical capacity be maintained? Training of trainers, documentation, local expertise..." className="w-full h-20 bg-slate-700 rounded px-2 py-1.5 text-xs resize-y" />
+                                        </div>
+                                        <div className="p-3 bg-slate-700/30 rounded">
+                                            <label className="block text-xs text-emerald-400 mb-1">Exit Strategy</label>
+                                            <textarea value={sustainabilityPlan.exit} onChange={e => setSustainabilityPlan({...sustainabilityPlan, exit: e.target.value})} placeholder="Phased transition plan, handover process, timeline for withdrawal..." className="w-full h-20 bg-slate-700 rounded px-2 py-1.5 text-xs resize-y" />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Tab 10: Checklist */}
+                            {activeTab === 10 && (
                                 <div className="space-y-4">
                                     <h2 className="text-lg font-semibold">✅ Attachment Checklist</h2>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -930,8 +1109,8 @@ Write the complete proposal. Make it compelling, evidence-based, and submission-
                                 </div>
                             )}
 
-                            {/* Tab 9: Output */}
-                            {activeTab === 9 && (
+                            {/* Tab 11: Output */}
+                            {activeTab === 11 && (
                                 <div className="space-y-4">
                                     <h2 className="text-lg font-semibold">🚀 Generate Proposal</h2>
                                     {!generatedPrompt ? (
@@ -956,7 +1135,7 @@ Write the complete proposal. Make it compelling, evidence-based, and submission-
 
                         <div className="flex justify-between mt-4 no-print">
                             <button onClick={() => setActiveTab(Math.max(0, activeTab - 1))} disabled={activeTab === 0} className={`px-4 py-1.5 rounded text-sm ${activeTab === 0 ? 'bg-slate-700 text-slate-500' : 'bg-slate-700 hover:bg-slate-600'}`}>← Prev</button>
-                            {activeTab < 9 ? (
+                            {activeTab < 11 ? (
                                 <button onClick={() => setActiveTab(activeTab + 1)} className="bg-indigo-600 px-4 py-1.5 rounded text-sm">Next →</button>
                             ) : (
                                 <button onClick={generatePrompt} className="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-1.5 rounded text-sm">Generate</button>
@@ -1036,7 +1215,7 @@ EVALUATION CRITERIA:
                             </div>
                         )}
 
-                        <div className="text-center mt-6 text-slate-500 text-xs no-print">Grant Proposal Writer Pro v6.1 | Auto-saves</div>
+                        <div className="text-center mt-6 text-slate-500 text-xs no-print">Grant Proposal Writer Pro v7.0 | Auto-saves</div>
                     </div>
                 </div>
             );
