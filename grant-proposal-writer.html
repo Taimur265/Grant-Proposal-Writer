@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grant Proposal Writer Pro v5.0</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
+        .tooltip { position: relative; }
+        .tooltip:hover .tooltip-text { visibility: visible; opacity: 1; }
+        .tooltip-text { visibility: hidden; opacity: 0; position: absolute; z-index: 50; bottom: 125%; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 8px 12px; border-radius: 6px; font-size: 12px; white-space: nowrap; transition: opacity 0.2s; max-width: 250px; white-space: normal; text-align: center; }
+        .tooltip-text::after { content: ""; position: absolute; top: 100%; left: 50%; margin-left: -5px; border: 5px solid transparent; border-top-color: #1e293b; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        .tab-content { animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @media print { .no-print { display: none !important; } }
+        .sdg-badge { display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; margin: 2px; cursor: pointer; transition: all 0.2s; }
+        .sdg-badge:hover { transform: scale(1.05); }
+        .sdg-badge.selected { box-shadow: 0 0 0 2px white, 0 0 0 4px currentColor; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useRef, useCallback, useEffect } = React;
+
+        // SDG Goals with colors
+        const SDG_GOALS = [
+            { id: 1, name: 'No Poverty', color: '#E5243B' },
+            { id: 2, name: 'Zero Hunger', color: '#DDA63A' },
+            { id: 3, name: 'Good Health', color: '#4C9F38' },
+            { id: 4, name: 'Quality Education', color: '#C5192D' },
+            { id: 5, name: 'Gender Equality', color: '#FF3A21' },
+            { id: 6, name: 'Clean Water', color: '#26BDE2' },
+            { id: 7, name: 'Clean Energy', color: '#FCC30B' },
+            { id: 8, name: 'Decent Work', color: '#A21942' },
+            { id: 9, name: 'Industry & Innovation', color: '#FD6925' },
+            { id: 10, name: 'Reduced Inequalities', color: '#DD1367' },
+            { id: 11, name: 'Sustainable Cities', color: '#FD9D24' },
+            { id: 12, name: 'Responsible Consumption', color: '#BF8B2E' },
+            { id: 13, name: 'Climate Action', color: '#3F7E44' },
+            { id: 14, name: 'Life Below Water', color: '#0A97D9' },
+            { id: 15, name: 'Life on Land', color: '#56C02B' },
+            { id: 16, name: 'Peace & Justice', color: '#00689D' },
+            { id: 17, name: 'Partnerships', color: '#19486A' }
+        ];
+
+        const PROPOSAL_TYPES = [
+            { value: 'standard', label: 'Standard Grant Proposal', category: 'General' },
+            { value: 'pilot', label: 'Pilot/Seed Grant', category: 'General' },
+            { value: 'scaling', label: 'Scaling/Expansion Grant', category: 'General' },
+            { value: 'research', label: 'Research Grant', category: 'General' },
+            { value: 'capacity', label: 'Capacity Building Grant', category: 'General' },
+            { value: 'climate_adaptation', label: 'Climate Adaptation Grant', category: 'Climate & Environment' },
+            { value: 'climate_mitigation', label: 'Climate Mitigation Grant', category: 'Climate & Environment' },
+            { value: 'renewable_energy', label: 'Renewable Energy Grant', category: 'Climate & Environment' },
+            { value: 'water_sanitation', label: 'WASH Grant', category: 'Climate & Environment' },
+            { value: 'biodiversity', label: 'Biodiversity Conservation Grant', category: 'Climate & Environment' },
+            { value: 'forest', label: 'Forestry & Reforestation Grant', category: 'Climate & Environment' },
+            { value: 'ocean', label: 'Ocean & Marine Conservation Grant', category: 'Climate & Environment' },
+            { value: 'waste', label: 'Waste Management Grant', category: 'Climate & Environment' },
+            { value: 'circular_economy', label: 'Circular Economy Grant', category: 'Climate & Environment' },
+            { value: 'sme', label: 'SME Development Grant', category: 'Business & Economic' },
+            { value: 'startup', label: 'Startup & Innovation Grant', category: 'Business & Economic' },
+            { value: 'social_enterprise', label: 'Social Enterprise Grant', category: 'Business & Economic' },
+            { value: 'financial_inclusion', label: 'Financial Inclusion Grant', category: 'Business & Economic' },
+            { value: 'trade', label: 'Trade & Export Development Grant', category: 'Business & Economic' },
+            { value: 'tourism', label: 'Tourism Development Grant', category: 'Business & Economic' },
+            { value: 'agribusiness', label: 'Agribusiness Grant', category: 'Business & Economic' },
+            { value: 'digital_economy', label: 'Digital Economy Grant', category: 'Business & Economic' },
+            { value: 'education_k12', label: 'K-12 Education Grant', category: 'Education' },
+            { value: 'education_higher', label: 'Higher Education Grant', category: 'Education' },
+            { value: 'education_vocational', label: 'Vocational Training Grant', category: 'Education' },
+            { value: 'education_stem', label: 'STEM Education Grant', category: 'Education' },
+            { value: 'education_girls', label: 'Girls Education Grant', category: 'Education' },
+            { value: 'education_inclusive', label: 'Inclusive Education Grant', category: 'Education' },
+            { value: 'literacy', label: 'Literacy Programs Grant', category: 'Education' },
+            { value: 'education_digital', label: 'Digital Learning Grant', category: 'Education' },
+            { value: 'healthcare_primary', label: 'Primary Healthcare Grant', category: 'Healthcare' },
+            { value: 'healthcare_maternal', label: 'Maternal & Child Health Grant', category: 'Healthcare' },
+            { value: 'healthcare_mental', label: 'Mental Health Grant', category: 'Healthcare' },
+            { value: 'healthcare_disease', label: 'Disease Prevention Grant', category: 'Healthcare' },
+            { value: 'healthcare_nutrition', label: 'Nutrition & Food Security Grant', category: 'Healthcare' },
+            { value: 'healthcare_hiv', label: 'HIV/AIDS Program Grant', category: 'Healthcare' },
+            { value: 'healthcare_digital', label: 'Digital Health/mHealth Grant', category: 'Healthcare' },
+            { value: 'healthcare_ncd', label: 'NCD Prevention Grant', category: 'Healthcare' },
+            { value: 'women_empowerment', label: 'Women Empowerment Grant', category: 'Social Development' },
+            { value: 'youth', label: 'Youth Development Grant', category: 'Social Development' },
+            { value: 'human_rights', label: 'Human Rights Grant', category: 'Social Development' },
+            { value: 'disability', label: 'Disability Inclusion Grant', category: 'Social Development' },
+            { value: 'refugee', label: 'Refugee & Migration Grant', category: 'Social Development' },
+            { value: 'governance', label: 'Governance & Democracy Grant', category: 'Social Development' },
+            { value: 'peacebuilding', label: 'Peacebuilding Grant', category: 'Social Development' },
+            { value: 'child_protection', label: 'Child Protection Grant', category: 'Social Development' },
+            { value: 'agriculture', label: 'Agriculture & Rural Development Grant', category: 'Infrastructure' },
+            { value: 'infrastructure', label: 'Infrastructure Development Grant', category: 'Infrastructure' },
+            { value: 'urban', label: 'Urban Development Grant', category: 'Infrastructure' },
+            { value: 'housing', label: 'Housing & Shelter Grant', category: 'Infrastructure' },
+            { value: 'transport', label: 'Transport & Connectivity Grant', category: 'Infrastructure' },
+            { value: 'rural_electrification', label: 'Rural Electrification Grant', category: 'Infrastructure' },
+            { value: 'disaster', label: 'Disaster Relief & Recovery Grant', category: 'Humanitarian' },
+            { value: 'humanitarian', label: 'Humanitarian Aid Grant', category: 'Humanitarian' },
+            { value: 'emergency', label: 'Emergency Response Grant', category: 'Humanitarian' },
+            { value: 'food_security', label: 'Food Security Grant', category: 'Humanitarian' },
+            { value: 'arts', label: 'Arts & Culture Grant', category: 'Other' },
+            { value: 'media', label: 'Media & Journalism Grant', category: 'Other' },
+            { value: 'sports', label: 'Sports & Recreation Grant', category: 'Other' },
+            { value: 'digital_transformation', label: 'Digital Transformation Grant', category: 'Other' },
+            { value: 'civic_tech', label: 'Civic Tech Grant', category: 'Other' }
+        ];
+
+        const FUNDER_PRESETS = [
+            { value: '', label: 'Select Funder (Optional)', requirements: '' },
+            { value: 'usaid', label: 'USAID', requirements: 'Requires DUNS/UEI, SAM.gov registration, detailed MEL plan, cost-share often required, environmental compliance (22 CFR 216), NICRA' },
+            { value: 'eu', label: 'European Union', requirements: 'Requires PADOR registration, detailed LogFrame, co-financing typically 10-20%, visibility requirements, EU budget format' },
+            { value: 'worldbank', label: 'World Bank', requirements: 'Focus on poverty reduction, detailed economic analysis, procurement compliance, safeguards, Results Framework' },
+            { value: 'gcf', label: 'Green Climate Fund', requirements: 'Climate impact, paradigm shift potential, country ownership, ESS compliance, accredited entity required' },
+            { value: 'gef', label: 'Global Environment Facility', requirements: 'Focal area alignment, incremental cost reasoning, GEF agency required, co-financing ratio' },
+            { value: 'gates', label: 'Bill & Melinda Gates Foundation', requirements: 'Innovation focus, scalability, measurable impact, partnership approach, milestone-based funding' },
+            { value: 'dfid', label: 'FCDO (UK)', requirements: 'Value for Money, Theory of Change, GESI analysis, Due Diligence, adaptive management' },
+            { value: 'sida', label: 'Sida (Sweden)', requirements: 'Results-Based Management, HRBA approach, environmental sustainability, anti-corruption' },
+            { value: 'giz', label: 'GIZ (Germany)', requirements: 'Results-based approach, capacity development focus, sustainability, knowledge management' },
+            { value: 'jica', label: 'JICA (Japan)', requirements: 'Technical cooperation focus, PDM matrix, sustainability, bilateral alignment' },
+            { value: 'koica', label: 'KOICA (Korea)', requirements: 'ODA alignment, detailed work plan, sustainability planning' },
+            { value: 'un', label: 'UN Agencies', requirements: 'UN framework alignment, HACT compliance, harmonized approach, country office coordination' },
+            { value: 'globalfund', label: 'Global Fund', requirements: 'Disease-specific (HIV, TB, Malaria), CCM endorsement, PUDR reporting, key populations focus' },
+            { value: 'gavi', label: 'GAVI', requirements: 'Immunization focus, health systems strengthening, sustainability transition, country ownership' },
+            { value: 'mastercard', label: 'Mastercard Foundation', requirements: 'Youth employment focus, dignified work, Africa priority, systems change approach' },
+            { value: 'ford', label: 'Ford Foundation', requirements: 'Social justice focus, systems change, narrative reporting, flexible funding' },
+            { value: 'rockefeller', label: 'Rockefeller Foundation', requirements: 'Innovation, resilience, equity, partnership approach, strategic alignment' },
+            { value: 'oak', label: 'Oak Foundation', requirements: 'Issue-specific alignment, partnership, learning focus, core support friendly' },
+            { value: 'hewlett', label: 'Hewlett Foundation', requirements: 'Strategy alignment, outcome focus, OE support, long-term partnership' },
+            { value: 'macarthur', label: 'MacArthur Foundation', requirements: 'Big bets approach, systems change, evidence-based, collaboration' }
+        ];
+
+        const EVALUATION_CRITERIA = [
+            { id: 'relevance', label: 'Relevance & Alignment', weight: 20, description: 'How well the proposal aligns with funder priorities' },
+            { id: 'methodology', label: 'Technical Approach & Methodology', weight: 25, description: 'Quality of proposed approach and innovation' },
+            { id: 'capacity', label: 'Organizational Capacity', weight: 15, description: 'Track record and capability to deliver' },
+            { id: 'budget', label: 'Budget & Cost Effectiveness', weight: 15, description: 'Value for money and budget justification' },
+            { id: 'impact', label: 'Expected Impact & Outcomes', weight: 15, description: 'Measurability and significance of results' },
+            { id: 'sustainability', label: 'Sustainability', weight: 10, description: 'Plans for continuation after funding ends' }
+        ];
+
+        const ATTACHMENT_CHECKLIST = [
+            { id: 'registration', label: 'Organization Registration Certificate', required: true },
+            { id: 'bylaws', label: 'Constitution/Bylaws', required: false },
+            { id: 'financial', label: 'Audited Financial Statements (last 2-3 years)', required: true },
+            { id: 'annual_report', label: 'Annual Report', required: false },
+            { id: 'orgchart', label: 'Organization Chart', required: false },
+            { id: 'cv_key', label: 'CVs of Key Personnel', required: true },
+            { id: 'references', label: 'Reference Letters', required: false },
+            { id: 'logframe', label: 'Logical Framework/Results Framework', required: true },
+            { id: 'budget_detailed', label: 'Detailed Budget (Excel)', required: true },
+            { id: 'budget_narrative', label: 'Budget Narrative', required: true },
+            { id: 'workplan', label: 'Work Plan/Gantt Chart', required: true },
+            { id: 'mou_partners', label: 'MoUs with Partner Organizations', required: false },
+            { id: 'support_letters', label: 'Letters of Support/Commitment', required: false },
+            { id: 'needs_assessment', label: 'Needs Assessment Report', required: false },
+            { id: 'baseline', label: 'Baseline Data/Studies', required: false },
+            { id: 'env_assessment', label: 'Environmental Assessment', required: false },
+            { id: 'safeguarding', label: 'Safeguarding Policy', required: false },
+            { id: 'gender_policy', label: 'Gender Policy', required: false },
+            { id: 'anti_fraud', label: 'Anti-Fraud/Corruption Policy', required: false },
+            { id: 'map', label: 'Project Location Map', required: false }
+        ];
+
+        function GrantProposalWriter() {
+            const [activeTab, setActiveTab] = useState(0);
+            const [inputMode, setInputMode] = useState('paste');
+            const [files, setFiles] = useState([]);
+            const [manualContent, setManualContent] = useState('');
+            const [proposalType, setProposalType] = useState('standard');
+            const [selectedFunder, setSelectedFunder] = useState('');
+            const [projectTitle, setProjectTitle] = useState('');
+            const [orgName, setOrgName] = useState('');
+            const [orgLocation, setOrgLocation] = useState('');
+            const [budgetRequest, setBudgetRequest] = useState('');
+            const [projectDuration, setProjectDuration] = useState('');
+            const [targetBeneficiaries, setTargetBeneficiaries] = useState('');
+            const [missionStatement, setMissionStatement] = useState('');
+            const [additionalContext, setAdditionalContext] = useState('');
+            const [teamMembers, setTeamMembers] = useState([{ name: '', role: '', qualifications: '', timeCommitment: '' }]);
+            const [partners, setPartners] = useState([{ name: '', type: '', role: '' }]);
+            const [budgetItems, setBudgetItems] = useState([{ category: '', item: '', amount: '', justification: '' }]);
+            const [selectedSDGs, setSelectedSDGs] = useState([]);
+            const [deadline, setDeadline] = useState('');
+            const [wordLimit, setWordLimit] = useState('');
+            const [logFrameObjective, setLogFrameObjective] = useState('');
+            const [logFrameOutcomes, setLogFrameOutcomes] = useState([{ outcome: '', indicators: '', means: '', assumptions: '' }]);
+            const [risks, setRisks] = useState([{ risk: '', likelihood: 'medium', impact: 'medium', mitigation: '' }]);
+            const [meIndicators, setMeIndicators] = useState([{ indicator: '', baseline: '', target: '', frequency: '', source: '' }]);
+            const [evaluationScores, setEvaluationScores] = useState({});
+            const [checkedAttachments, setCheckedAttachments] = useState([]);
+            const [generatedPrompt, setGeneratedPrompt] = useState('');
+            const [showTips, setShowTips] = useState(false);
+            const [showSample, setShowSample] = useState(false);
+            const [showBudgetGuide, setShowBudgetGuide] = useState(false);
+            const [showLogFrameGuide, setShowLogFrameGuide] = useState(false);
+            const [copySuccess, setCopySuccess] = useState(false);
+            const fileInputRef = useRef(null);
+            const dropZoneRef = useRef(null);
+
+            // Load from localStorage
+            useEffect(() => {
+                const saved = localStorage.getItem('grantProposalData_v5');
+                if (saved) {
+                    try {
+                        const data = JSON.parse(saved);
+                        if (data.manualContent) setManualContent(data.manualContent);
+                        if (data.proposalType) setProposalType(data.proposalType);
+                        if (data.selectedFunder) setSelectedFunder(data.selectedFunder);
+                        if (data.projectTitle) setProjectTitle(data.projectTitle);
+                        if (data.orgName) setOrgName(data.orgName);
+                        if (data.orgLocation) setOrgLocation(data.orgLocation);
+                        if (data.budgetRequest) setBudgetRequest(data.budgetRequest);
+                        if (data.projectDuration) setProjectDuration(data.projectDuration);
+                        if (data.targetBeneficiaries) setTargetBeneficiaries(data.targetBeneficiaries);
+                        if (data.missionStatement) setMissionStatement(data.missionStatement);
+                        if (data.additionalContext) setAdditionalContext(data.additionalContext);
+                        if (data.teamMembers) setTeamMembers(data.teamMembers);
+                        if (data.partners) setPartners(data.partners);
+                        if (data.budgetItems) setBudgetItems(data.budgetItems);
+                        if (data.selectedSDGs) setSelectedSDGs(data.selectedSDGs);
+                        if (data.deadline) setDeadline(data.deadline);
+                        if (data.wordLimit) setWordLimit(data.wordLimit);
+                        if (data.logFrameObjective) setLogFrameObjective(data.logFrameObjective);
+                        if (data.logFrameOutcomes) setLogFrameOutcomes(data.logFrameOutcomes);
+                        if (data.risks) setRisks(data.risks);
+                        if (data.meIndicators) setMeIndicators(data.meIndicators);
+                        if (data.checkedAttachments) setCheckedAttachments(data.checkedAttachments);
+                    } catch (e) { console.log('Error loading saved data'); }
+                }
+            }, []);
+
+            // Save to localStorage
+            useEffect(() => {
+                const data = { manualContent, proposalType, selectedFunder, projectTitle, orgName, orgLocation, budgetRequest, projectDuration, targetBeneficiaries, missionStatement, additionalContext, teamMembers, partners, budgetItems, selectedSDGs, deadline, wordLimit, logFrameObjective, logFrameOutcomes, risks, meIndicators, checkedAttachments };
+                localStorage.setItem('grantProposalData_v5', JSON.stringify(data));
+            }, [manualContent, proposalType, selectedFunder, projectTitle, orgName, orgLocation, budgetRequest, projectDuration, targetBeneficiaries, missionStatement, additionalContext, teamMembers, partners, budgetItems, selectedSDGs, deadline, wordLimit, logFrameObjective, logFrameOutcomes, risks, meIndicators, checkedAttachments]);
+
+            const handleDrop = useCallback((e) => {
+                e.preventDefault();
+                const droppedFiles = Array.from(e.dataTransfer.files).filter(f => f.type === 'text/plain' || f.name.endsWith('.txt'));
+                if (droppedFiles.length > 0) {
+                    droppedFiles.forEach(file => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            setFiles(prev => [...prev, { name: file.name, content: e.target.result, size: file.size }]);
+                        };
+                        reader.readAsText(file);
+                    });
+                } else {
+                    alert('Please use .txt files for reliable text extraction. PDFs and Word documents require conversion first.');
+                }
+            }, []);
+
+            const handleFileSelect = (e) => {
+                const selectedFiles = Array.from(e.target.files);
+                selectedFiles.forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        const content = ev.target.result;
+                        const isBinary = content.includes('%PDF') || content.includes('PK') || /[\x00-\x08]/.test(content.slice(0,500));
+                        if (isBinary) {
+                            alert(`"${file.name}" appears to be a binary file. Please convert to .txt for best results.`);
+                        }
+                        setFiles(prev => [...prev, { name: file.name, content: content, size: file.size }]);
+                    };
+                    reader.readAsText(file);
+                });
+            };
+
+            const getTotalBudget = () => budgetItems.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+
+            const getDeadlineInfo = () => {
+                if (!deadline) return null;
+                const deadlineDate = new Date(deadline);
+                const today = new Date();
+                const diffTime = deadlineDate - today;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                return { days: diffDays, date: deadlineDate.toLocaleDateString() };
+            };
+
+            const getWordCount = () => {
+                const allText = manualContent + additionalContext + logFrameObjective;
+                return allText.split(/\s+/).filter(w => w).length;
+            };
+
+            const getCompletionPercentage = () => {
+                let filled = 0;
+                let total = 10;
+                if (manualContent || files.length > 0) filled++;
+                if (projectTitle) filled++;
+                if (orgName) filled++;
+                if (budgetRequest) filled++;
+                if (projectDuration) filled++;
+                if (targetBeneficiaries) filled++;
+                if (selectedSDGs.length > 0) filled++;
+                if (logFrameObjective) filled++;
+                if (risks.some(r => r.risk)) filled++;
+                if (meIndicators.some(m => m.indicator)) filled++;
+                return Math.round((filled / total) * 100);
+            };
+
+            const getSelfEvaluationScore = () => {
+                let totalWeight = 0;
+                let weightedScore = 0;
+                EVALUATION_CRITERIA.forEach(c => {
+                    if (evaluationScores[c.id]) {
+                        weightedScore += (evaluationScores[c.id] / 5) * c.weight;
+                        totalWeight += c.weight;
+                    }
+                });
+                return totalWeight > 0 ? Math.round((weightedScore / totalWeight) * 100) : 0;
+            };
+
+            const toggleSDG = (id) => {
+                setSelectedSDGs(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
+            };
+
+            const addTeamMember = () => setTeamMembers([...teamMembers, { name: '', role: '', qualifications: '', timeCommitment: '' }]);
+            const removeTeamMember = (i) => setTeamMembers(teamMembers.filter((_, j) => j !== i));
+            const updateTeamMember = (i, field, value) => { const updated = [...teamMembers]; updated[i][field] = value; setTeamMembers(updated); };
+
+            const addPartner = () => setPartners([...partners, { name: '', type: '', role: '' }]);
+            const removePartner = (i) => setPartners(partners.filter((_, j) => j !== i));
+            const updatePartner = (i, field, value) => { const updated = [...partners]; updated[i][field] = value; setPartners(updated); };
+
+            const addBudgetItem = () => setBudgetItems([...budgetItems, { category: '', item: '', amount: '', justification: '' }]);
+            const removeBudgetItem = (i) => setBudgetItems(budgetItems.filter((_, j) => j !== i));
+            const updateBudgetItem = (i, field, value) => { const updated = [...budgetItems]; updated[i][field] = value; setBudgetItems(updated); };
+
+            const addLogFrameOutcome = () => setLogFrameOutcomes([...logFrameOutcomes, { outcome: '', indicators: '', means: '', assumptions: '' }]);
+            const removeLogFrameOutcome = (i) => setLogFrameOutcomes(logFrameOutcomes.filter((_, j) => j !== i));
+            const updateLogFrameOutcome = (i, field, value) => { const updated = [...logFrameOutcomes]; updated[i][field] = value; setLogFrameOutcomes(updated); };
+
+            const addRisk = () => setRisks([...risks, { risk: '', likelihood: 'medium', impact: 'medium', mitigation: '' }]);
+            const removeRisk = (i) => setRisks(risks.filter((_, j) => j !== i));
+            const updateRisk = (i, field, value) => { const updated = [...risks]; updated[i][field] = value; setRisks(updated); };
+
+            const addMEIndicator = () => setMeIndicators([...meIndicators, { indicator: '', baseline: '', target: '', frequency: '', source: '' }]);
+            const removeMEIndicator = (i) => setMeIndicators(meIndicators.filter((_, j) => j !== i));
+            const updateMEIndicator = (i, field, value) => { const updated = [...meIndicators]; updated[i][field] = value; setMeIndicators(updated); };
+
+            const toggleAttachment = (id) => {
+                setCheckedAttachments(prev => prev.includes(id) ? prev.filter(a => a !== id) : [...prev, id]);
+            };
+
+            const clearAll = () => {
+                if (window.confirm('Clear all data? This cannot be undone.')) {
+                    setManualContent(''); setFiles([]); setProjectTitle(''); setOrgName(''); setOrgLocation('');
+                    setBudgetRequest(''); setProjectDuration(''); setTargetBeneficiaries(''); setMissionStatement('');
+                    setAdditionalContext(''); setTeamMembers([{ name: '', role: '', qualifications: '', timeCommitment: '' }]);
+                    setPartners([{ name: '', type: '', role: '' }]);
+                    setBudgetItems([{ category: '', item: '', amount: '', justification: '' }]);
+                    setSelectedSDGs([]); setDeadline(''); setWordLimit('');
+                    setLogFrameObjective(''); setLogFrameOutcomes([{ outcome: '', indicators: '', means: '', assumptions: '' }]);
+                    setRisks([{ risk: '', likelihood: 'medium', impact: 'medium', mitigation: '' }]);
+                    setMeIndicators([{ indicator: '', baseline: '', target: '', frequency: '', source: '' }]);
+                    setEvaluationScores({}); setCheckedAttachments([]);
+                    setGeneratedPrompt(''); setSelectedFunder(''); setProposalType('standard');
+                    localStorage.removeItem('grantProposalData_v5');
+                }
+            };
+
+            const generatePrompt = () => {
+                const docContent = inputMode === 'paste' ? manualContent : files.map(f => `--- ${f.name} ---\n${f.content}`).join('\n\n');
+                if (!docContent.trim()) { alert('Please provide grant document content.'); return; }
+
+                const typeLabel = PROPOSAL_TYPES.find(t => t.value === proposalType)?.label || 'Grant Proposal';
+                const funderInfo = FUNDER_PRESETS.find(f => f.value === selectedFunder);
+                const sdgNames = selectedSDGs.map(id => SDG_GOALS.find(g => g.id === id)?.name).filter(Boolean);
+                const deadlineInfo = getDeadlineInfo();
+
+                const prompt = `You are an expert grant proposal writer with 30+ years of experience securing funding from major international donors, foundations, and government agencies. You have served on grant review panels for USAID, EU, World Bank, and major foundations. Your proposals have a 75%+ success rate.
+
+## YOUR TASK
+Write a comprehensive, submission-ready ${typeLabel} based on the grant documents and organization details provided below.
+
+## GRANT DOCUMENTS (RFP/Guidelines)
+${docContent}
+
+## ORGANIZATION DETAILS
+${projectTitle ? `**Project Title:** ${projectTitle}` : ''}
+${orgName ? `**Organization:** ${orgName}` : ''}
+${orgLocation ? `**Location/Geographic Focus:** ${orgLocation}` : ''}
+${budgetRequest ? `**Budget Request:** ${budgetRequest}` : ''}
+${projectDuration ? `**Project Duration:** ${projectDuration}` : ''}
+${targetBeneficiaries ? `**Target Beneficiaries:** ${targetBeneficiaries}` : ''}
+${missionStatement ? `**Mission Statement:** ${missionStatement}` : ''}
+${selectedSDGs.length > 0 ? `**SDG Alignment:** ${sdgNames.join(', ')}` : ''}
+${funderInfo?.requirements ? `**Funder Requirements:** ${funderInfo.requirements}` : ''}
+${deadlineInfo ? `**Deadline:** ${deadlineInfo.date} (${deadlineInfo.days} days remaining)` : ''}
+${wordLimit ? `**Word/Page Limit:** ${wordLimit}` : ''}
+
+## KEY PERSONNEL
+${teamMembers.filter(t => t.name).map(t => `- **${t.name}** - ${t.role}${t.qualifications ? ` | ${t.qualifications}` : ''}${t.timeCommitment ? ` | ${t.timeCommitment}` : ''}`).join('\n') || 'Not specified'}
+
+## PARTNER ORGANIZATIONS
+${partners.filter(p => p.name).map(p => `- **${p.name}** (${p.type || 'Partner'}) - ${p.role || 'Supporting implementation'}`).join('\n') || 'Not specified'}
+
+## BUDGET FRAMEWORK
+${budgetItems.filter(b => b.item).map(b => `- ${b.category ? `[${b.category}]` : ''} ${b.item}: ${b.amount ? `$${parseFloat(b.amount).toLocaleString()}` : 'TBD'}${b.justification ? ` - ${b.justification}` : ''}`).join('\n') || 'Not specified'}
+${getTotalBudget() > 0 ? `**Total Budget:** $${getTotalBudget().toLocaleString()}` : ''}
+
+## LOGICAL FRAMEWORK
+${logFrameObjective ? `**Overall Objective:** ${logFrameObjective}` : ''}
+${logFrameOutcomes.filter(o => o.outcome).map((o, i) => `
+**Outcome ${i+1}:** ${o.outcome}
+${o.indicators ? `- Indicators: ${o.indicators}` : ''}
+${o.means ? `- Means of Verification: ${o.means}` : ''}
+${o.assumptions ? `- Assumptions: ${o.assumptions}` : ''}`).join('\n') || ''}
+
+## RISK MATRIX
+${risks.filter(r => r.risk).map(r => `- **${r.risk}** | Likelihood: ${r.likelihood} | Impact: ${r.impact}${r.mitigation ? ` | Mitigation: ${r.mitigation}` : ''}`).join('\n') || 'Not specified'}
+
+## M&E INDICATORS
+${meIndicators.filter(m => m.indicator).map(m => `- **${m.indicator}**${m.baseline ? ` | Baseline: ${m.baseline}` : ''}${m.target ? ` | Target: ${m.target}` : ''}${m.frequency ? ` | Frequency: ${m.frequency}` : ''}${m.source ? ` | Source: ${m.source}` : ''}`).join('\n') || 'Not specified'}
+
+${additionalContext ? `## ADDITIONAL CONTEXT\n${additionalContext}` : ''}
+
+## PROPOSAL REQUIREMENTS
+
+### 1. CRITICAL ANALYSIS (Do this first)
+Before writing, analyze the grant documents to identify:
+- Funder's strategic priorities and key themes
+- Evaluation criteria and scoring weights
+- Required sections and format specifications
+- Word/page limits for each section
+- Mandatory compliance requirements
+- Deadline and submission requirements
+
+### 2. PROPOSAL STRUCTURE
+Generate a complete proposal with these sections:
+
+**A. EXECUTIVE SUMMARY** (1 page max)
+- Compelling opening statement
+- Problem statement (2-3 sentences)
+- Proposed solution overview
+- Key outcomes and impact
+- Total budget and duration
+- Organization credentials (1 sentence)
+
+**B. ORGANIZATIONAL BACKGROUND** (1-2 pages)
+- Legal status and history
+- Mission and vision alignment
+- Relevant experience and track record
+- Geographic presence and local knowledge
+- Key achievements with metrics
+- Awards and recognition
+
+**C. PROBLEM STATEMENT / NEEDS ASSESSMENT** (2-3 pages)
+- Context analysis with current data/statistics
+- Root cause analysis
+- Target population profile
+- Gap analysis
+- Consequences of inaction
+- Alignment with funder priorities
+
+**D. PROJECT DESCRIPTION** (4-6 pages)
+- Theory of Change narrative
+- Goal and SMART objectives
+- Detailed activities by objective
+- Methodology and approach
+- Innovation and value-add
+- Target beneficiaries (direct and indirect)
+- Geographic scope
+- Gender and social inclusion approach
+
+**E. IMPLEMENTATION PLAN** (2-3 pages)
+- Phased approach with milestones
+- Detailed work plan/Gantt chart
+- Roles and responsibilities
+- Coordination mechanisms
+- Quality assurance measures
+
+**F. MANAGEMENT & STAFFING** (1-2 pages)
+- Project management structure
+- Key personnel qualifications
+- Reporting lines
+- Technical assistance plan
+- Capacity building approach
+
+**G. MONITORING, EVALUATION & LEARNING** (2-3 pages)
+- M&E framework overview
+- Logical Framework Matrix
+- Key Performance Indicators
+- Data collection methods
+- Baseline and endline plans
+- Learning and adaptation approach
+- Reporting schedule
+
+**H. RISK MANAGEMENT** (1 page)
+- Risk matrix (likelihood x impact)
+- Mitigation strategies
+- Contingency plans
+- Adaptive management approach
+
+**I. SUSTAINABILITY PLAN** (1-2 pages)
+- Exit strategy
+- Institutional sustainability
+- Financial sustainability
+- Technical sustainability
+- Community ownership
+- Scale-up potential
+
+**J. PARTNERSHIPS** (1 page)
+- Partner roles and responsibilities
+- Coordination mechanisms
+- MoU status
+- Stakeholder engagement
+
+**K. BUDGET NARRATIVE** (2-3 pages)
+- Budget summary by category
+- Cost assumptions and justifications
+- Cost-effectiveness analysis
+- Co-financing/cost-share (if applicable)
+- Budget management approach
+
+**L. ANNEXES**
+- Detailed budget (spreadsheet format)
+- Logical Framework Matrix
+- Work Plan/Gantt Chart
+- Organogram
+- CVs of key personnel
+- Letters of support
+- Maps and diagrams
+
+### 3. SECTOR-SPECIFIC EXCELLENCE
+${proposalType.includes('climate') ? `For Climate/Environment proposals:
+- Include GHG emissions reduction calculations
+- Address climate vulnerability and resilience
+- Reference IPCC/UNFCCC frameworks
+- Include nature-based solutions where appropriate
+- Address just transition principles` : ''}
+${proposalType.includes('healthcare') ? `For Healthcare proposals:
+- Reference WHO guidelines and standards
+- Include health systems strengthening
+- Address Universal Health Coverage
+- Include community health approach
+- Reference relevant disease burden data` : ''}
+${proposalType.includes('education') ? `For Education proposals:
+- Reference SDG 4 and national education plans
+- Include learning outcomes measurement
+- Address equity and inclusion
+- Include teacher training components
+- Reference education quality frameworks` : ''}
+${proposalType.includes('sme') || proposalType.includes('business') ? `For SME/Business Development proposals:
+- Include job creation projections
+- Address market access and value chains
+- Include financial sustainability metrics
+- Reference private sector engagement
+- Include business model canvas elements` : ''}
+${proposalType.includes('humanitarian') || proposalType.includes('disaster') ? `For Humanitarian proposals:
+- Reference humanitarian principles
+- Include do-no-harm approach
+- Address accountability to affected populations
+- Include coordination with clusters
+- Reference Sphere standards` : ''}
+
+### 4. CROSS-CUTTING THEMES
+Integrate throughout the proposal:
+- Gender equality and women's empowerment (GESI analysis)
+- Environmental sustainability
+- Disability inclusion
+- Youth engagement
+- Human rights-based approach
+- Conflict sensitivity (where applicable)
+- Climate resilience
+
+### 5. QUALITY STANDARDS
+Ensure the proposal:
+- Uses active voice and action verbs
+- Includes quantifiable targets and metrics
+- Cites credible data sources
+- Avoids jargon and acronyms (or explains them)
+- Maintains consistent formatting
+- Addresses all evaluation criteria
+- Respects word/page limits
+- Uses funder's preferred terminology
+- Includes clear theory of change logic
+- Demonstrates value for money
+
+### 6. COMMON REJECTION REASONS TO AVOID
+- Vague objectives without measurable indicators
+- Unrealistic timelines or budgets
+- Weak sustainability planning
+- Missing required sections or documents
+- Budget not matching activities
+- Lack of local ownership
+- Insufficient M&E framework
+- No evidence of organizational capacity
+- Ignoring cross-cutting themes
+- Not addressing all evaluation criteria
+
+Now write the complete grant proposal following this structure. Make it compelling, evidence-based, and ready for submission.`;
+
+                setGeneratedPrompt(prompt);
+                setActiveTab(7);
+
+                // Copy to clipboard
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(prompt).then(() => {
+                        setCopySuccess(true);
+                        setTimeout(() => setCopySuccess(false), 3000);
+                    }).catch(() => {
+                        // Fallback
+                        const textarea = document.createElement('textarea');
+                        textarea.value = prompt;
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textarea);
+                        setCopySuccess(true);
+                        setTimeout(() => setCopySuccess(false), 3000);
+                    });
+                }
+            };
+
+            const tabs = [
+                { name: 'Documents', icon: '📄' },
+                { name: 'Organization', icon: '🏢' },
+                { name: 'Team', icon: '👥' },
+                { name: 'LogFrame', icon: '📊' },
+                { name: 'M&E', icon: '📈' },
+                { name: 'Budget', icon: '💰' },
+                { name: 'Checklist', icon: '✅' },
+                { name: 'Output', icon: '🚀' }
+            ];
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 text-white p-4">
+                    <div className="max-w-6xl mx-auto">
+                        {/* Header */}
+                        <div className="text-center mb-6">
+                            <h1 className="text-3xl font-bold mb-2">Grant Proposal Writer Pro v5.0</h1>
+                            <p className="text-slate-400">Comprehensive AI-Powered Grant Writing Assistant</p>
+                            <div className="flex justify-center gap-4 mt-3 text-sm">
+                                <span className="bg-emerald-600/20 text-emerald-400 px-3 py-1 rounded-full">{getCompletionPercentage()}% Complete</span>
+                                {deadline && getDeadlineInfo() && (
+                                    <span className={`px-3 py-1 rounded-full ${getDeadlineInfo().days < 7 ? 'bg-red-600/20 text-red-400' : getDeadlineInfo().days < 14 ? 'bg-yellow-600/20 text-yellow-400' : 'bg-blue-600/20 text-blue-400'}`}>
+                                        {getDeadlineInfo().days} days to deadline
+                                    </span>
+                                )}
+                                {wordLimit && <span className="bg-purple-600/20 text-purple-400 px-3 py-1 rounded-full">{getWordCount()} words</span>}
+                            </div>
+                        </div>
+
+                        {/* Progress Steps */}
+                        <div className="flex justify-center mb-6 overflow-x-auto no-print">
+                            <div className="flex gap-1 bg-slate-800/50 p-1 rounded-lg">
+                                {tabs.map((tab, i) => (
+                                    <button key={i} onClick={() => setActiveTab(i)} className={`px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-1 ${activeTab === i ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-700'}`}>
+                                        <span>{tab.icon}</span>
+                                        <span className="hidden sm:inline">{tab.name}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex flex-wrap justify-center gap-2 mb-6 no-print">
+                            <button onClick={() => setShowTips(true)} className="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded-lg text-sm font-medium">💡 Grant Tips</button>
+                            <button onClick={() => setShowSample(true)} className="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm font-medium">📋 Sample RFP</button>
+                            <button onClick={() => setShowLogFrameGuide(true)} className="bg-purple-600 hover:bg-purple-500 px-4 py-2 rounded-lg text-sm font-medium">📊 LogFrame Guide</button>
+                            <button onClick={() => setShowBudgetGuide(true)} className="bg-amber-600 hover:bg-amber-500 px-4 py-2 rounded-lg text-sm font-medium">💰 Budget Guide</button>
+                            <button onClick={clearAll} className="bg-red-600/20 hover:bg-red-600/40 text-red-400 px-4 py-2 rounded-lg text-sm font-medium">🗑️ Clear All</button>
+                        </div>
+
+                        {/* Main Content */}
+                        <div className="bg-slate-800/50 rounded-xl p-6 tab-content">
+                            {/* Tab 0: Documents */}
+                            {activeTab === 0 && (
+                                <div className="space-y-6">
+                                    <h2 className="text-xl font-semibold flex items-center gap-2">📄 Grant Documents</h2>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div>
+                                            <label className="block text-sm text-slate-400 mb-1">Proposal Type *</label>
+                                            <select value={proposalType} onChange={e => setProposalType(e.target.value)} className="w-full bg-slate-700 rounded-lg px-4 py-2 text-white">
+                                                {Object.entries(PROPOSAL_TYPES.reduce((acc, t) => { (acc[t.category] = acc[t.category] || []).push(t); return acc; }, {})).map(([cat, types]) => (
+                                                    <optgroup key={cat} label={cat}>
+                                                        {types.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                                                    </optgroup>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm text-slate-400 mb-1">Funder Preset</label>
+                                            <select value={selectedFunder} onChange={e => setSelectedFunder(e.target.value)} className="w-full bg-slate-700 rounded-lg px-4 py-2 text-white">
+                                                {FUNDER_PRESETS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm text-slate-400 mb-1">Deadline</label>
+                                            <input type="date" value={deadline} onChange={e => setDeadline(e.target.value)} className="w-full bg-slate-700 rounded-lg px-4 py-2 text-white" />
+                                        </div>
+                                    </div>
+
+                                    {selectedFunder && FUNDER_PRESETS.find(f => f.value === selectedFunder)?.requirements && (
+                                        <div className="bg-indigo-900/30 border border-indigo-500/30 rounded-lg p-4">
+                                            <p className="text-sm text-indigo-300"><strong>Funder Requirements:</strong> {FUNDER_PRESETS.find(f => f.value === selectedFunder).requirements}</p>
+                                        </div>
+                                    )}
+
+                                    <div className="flex gap-2">
+                                        <button onClick={() => setInputMode('paste')} className={`px-4 py-2 rounded-lg text-sm font-medium ${inputMode === 'paste' ? 'bg-indigo-600' : 'bg-slate-700'}`}>📝 Paste Text</button>
+                                        <button onClick={() => setInputMode('upload')} className={`px-4 py-2 rounded-lg text-sm font-medium ${inputMode === 'upload' ? 'bg-indigo-600' : 'bg-slate-700'}`}>📁 Upload Files</button>
+                                    </div>
+
+                                    {inputMode === 'paste' ? (
+                                        <div>
+                                            <label className="block text-sm text-slate-400 mb-1">Paste grant document content (RFP, guidelines, requirements) *</label>
+                                            <textarea value={manualContent} onChange={e => setManualContent(e.target.value)} placeholder="Paste your grant documents here..." className="w-full h-64 bg-slate-700 rounded-lg px-4 py-3 text-white resize-y" />
+                                            <p className="text-xs text-slate-500 mt-1">{manualContent.length} characters | {manualContent.split(/\s+/).filter(w => w).length} words</p>
+                                        </div>
+                                    ) : (
+                                        <div>
+                                            <div ref={dropZoneRef} onDrop={handleDrop} onDragOver={e => e.preventDefault()} className="border-2 border-dashed border-slate-600 rounded-lg p-8 text-center hover:border-indigo-500 transition-colors cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                                                <p className="text-slate-400">Drag & drop .txt files here or click to browse</p>
+                                                <p className="text-xs text-slate-500 mt-2">For best results, convert PDFs/Word docs to plain text first</p>
+                                                <input ref={fileInputRef} type="file" multiple accept=".txt,.pdf,.docx,.doc" onChange={handleFileSelect} className="hidden" />
+                                            </div>
+                                            {files.length > 0 && (
+                                                <div className="mt-4 space-y-2">
+                                                    {files.map((f, i) => (
+                                                        <div key={i} className="flex items-center justify-between bg-slate-700/50 rounded-lg px-4 py-2">
+                                                            <span className="text-sm">{f.name} ({(f.size/1024).toFixed(1)} KB)</span>
+                                                            <button onClick={() => setFiles(files.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-300">Remove</button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm text-slate-400 mb-1">Project Title *</label>
+                                            <input type="text" value={projectTitle} onChange={e => setProjectTitle(e.target.value)} placeholder="e.g., Empowering Rural Women Through..." className="w-full bg-slate-700 rounded-lg px-4 py-2 text-white" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm text-slate-400 mb-1">Word/Page Limit</label>
+                                            <input type="text" value={wordLimit} onChange={e => setWordLimit(e.target.value)} placeholder="e.g., 5000 words or 15 pages" className="w-full bg-slate-700 rounded-lg px-4 py-2 text-white" />
+                                        </div>
+                                    </div>
+
+                                    {/* SDG Alignment */}
+                                    <div>
+                                        <label className="block text-sm text-slate-400 mb-2">SDG Alignment (Select all that apply)</label>
+                                        <div className="flex flex-wrap gap-1">
+                                            {SDG_GOALS.map(sdg => (
+                                                <button key={sdg.id} onClick={() => toggleSDG(sdg.id)} className={`sdg-badge ${selectedSDGs.includes(sdg.id) ? 'selected' : ''}`} style={{ backgroundColor: sdg.color + '30', color: sdg.color, borderColor: sdg.color }}>
+                                                    {sdg.id}. {sdg.name}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Tab 1: Organization */}
+                            {activeTab === 1 && (
+                                <div className="space-y-6">
+                                    <h2 className="text-xl font-semibold flex items-center gap-2">🏢 Organization Details</h2>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm text-slate-400 mb-1">Organization Name *</label>
+                                            <input type="text" value={orgName} onChange={e => setOrgName(e.target.value)} className="w-full bg-slate-700 rounded-lg px-4 py-2 text-white" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm text-slate-400 mb-1">Location / Geographic Focus</label>
+                                            <input type="text" value={orgLocation} onChange={e => setOrgLocation(e.target.value)} className="w-full bg-slate-700 rounded-lg px-4 py-2 text-white" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm text-slate-400 mb-1">Budget Request *</label>
+                                            <input type="text" value={budgetRequest} onChange={e => setBudgetRequest(e.target.value)} placeholder="e.g., $500,000 USD" className="w-full bg-slate-700 rounded-lg px-4 py-2 text-white" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm text-slate-400 mb-1">Project Duration</label>
+                                            <input type="text" value={projectDuration} onChange={e => setProjectDuration(e.target.value)} placeholder="e.g., 24 months" className="w-full bg-slate-700 rounded-lg px-4 py-2 text-white" />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm text-slate-400 mb-1">Target Beneficiaries</label>
+                                        <input type="text" value={targetBeneficiaries} onChange={e => setTargetBeneficiaries(e.target.value)} placeholder="e.g., 5,000 women farmers in rural communities" className="w-full bg-slate-700 rounded-lg px-4 py-2 text-white" />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm text-slate-400 mb-1">Mission Statement</label>
+                                        <textarea value={missionStatement} onChange={e => setMissionStatement(e.target.value)} placeholder="Your organization's mission..." className="w-full h-24 bg-slate-700 rounded-lg px-4 py-3 text-white resize-y" />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm text-slate-400 mb-1">Additional Context</label>
+                                        <textarea value={additionalContext} onChange={e => setAdditionalContext(e.target.value)} placeholder="Any additional information about your organization or project..." className="w-full h-32 bg-slate-700 rounded-lg px-4 py-3 text-white resize-y" />
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Tab 2: Team & Partners */}
+                            {activeTab === 2 && (
+                                <div className="space-y-6">
+                                    <h2 className="text-xl font-semibold flex items-center gap-2">👥 Team & Partners</h2>
+
+                                    <div>
+                                        <div className="flex justify-between items-center mb-3">
+                                            <h3 className="font-medium">Key Personnel</h3>
+                                            <button onClick={addTeamMember} className="bg-indigo-600 hover:bg-indigo-500 px-3 py-1 rounded text-sm">+ Add Member</button>
+                                        </div>
+                                        {teamMembers.map((member, i) => (
+                                            <div key={i} className="grid grid-cols-1 md:grid-cols-5 gap-2 mb-2 p-3 bg-slate-700/30 rounded-lg">
+                                                <input type="text" value={member.name} onChange={e => updateTeamMember(i, 'name', e.target.value)} placeholder="Name" className="bg-slate-700 rounded px-3 py-2 text-sm" />
+                                                <input type="text" value={member.role} onChange={e => updateTeamMember(i, 'role', e.target.value)} placeholder="Role/Position" className="bg-slate-700 rounded px-3 py-2 text-sm" />
+                                                <input type="text" value={member.qualifications} onChange={e => updateTeamMember(i, 'qualifications', e.target.value)} placeholder="Qualifications" className="bg-slate-700 rounded px-3 py-2 text-sm" />
+                                                <input type="text" value={member.timeCommitment} onChange={e => updateTeamMember(i, 'timeCommitment', e.target.value)} placeholder="% Time" className="bg-slate-700 rounded px-3 py-2 text-sm" />
+                                                {teamMembers.length > 1 && <button onClick={() => removeTeamMember(i)} className="bg-red-600/20 text-red-400 rounded px-3 py-2 text-sm hover:bg-red-600/40">Remove</button>}
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <div>
+                                        <div className="flex justify-between items-center mb-3">
+                                            <h3 className="font-medium">Partner Organizations</h3>
+                                            <button onClick={addPartner} className="bg-indigo-600 hover:bg-indigo-500 px-3 py-1 rounded text-sm">+ Add Partner</button>
+                                        </div>
+                                        {partners.map((partner, i) => (
+                                            <div key={i} className="grid grid-cols-1 md:grid-cols-4 gap-2 mb-2 p-3 bg-slate-700/30 rounded-lg">
+                                                <input type="text" value={partner.name} onChange={e => updatePartner(i, 'name', e.target.value)} placeholder="Organization Name" className="bg-slate-700 rounded px-3 py-2 text-sm" />
+                                                <select value={partner.type} onChange={e => updatePartner(i, 'type', e.target.value)} className="bg-slate-700 rounded px-3 py-2 text-sm">
+                                                    <option value="">Partner Type</option>
+                                                    <option value="implementing">Implementing Partner</option>
+                                                    <option value="technical">Technical Partner</option>
+                                                    <option value="government">Government Partner</option>
+                                                    <option value="academic">Academic/Research</option>
+                                                    <option value="private">Private Sector</option>
+                                                    <option value="community">Community Organization</option>
+                                                </select>
+                                                <input type="text" value={partner.role} onChange={e => updatePartner(i, 'role', e.target.value)} placeholder="Role in Project" className="bg-slate-700 rounded px-3 py-2 text-sm" />
+                                                {partners.length > 1 && <button onClick={() => removePartner(i)} className="bg-red-600/20 text-red-400 rounded px-3 py-2 text-sm hover:bg-red-600/40">Remove</button>}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Tab 3: LogFrame */}
+                            {activeTab === 3 && (
+                                <div className="space-y-6">
+                                    <h2 className="text-xl font-semibold flex items-center gap-2">📊 Logical Framework</h2>
+
+                                    <div>
+                                        <label className="block text-sm text-slate-400 mb-1">Overall Objective / Goal</label>
+                                        <textarea value={logFrameObjective} onChange={e => setLogFrameObjective(e.target.value)} placeholder="The high-level change your project contributes to..." className="w-full h-20 bg-slate-700 rounded-lg px-4 py-3 text-white resize-y" />
+                                    </div>
+
+                                    <div>
+                                        <div className="flex justify-between items-center mb-3">
+                                            <h3 className="font-medium">Outcomes</h3>
+                                            <button onClick={addLogFrameOutcome} className="bg-indigo-600 hover:bg-indigo-500 px-3 py-1 rounded text-sm">+ Add Outcome</button>
+                                        </div>
+                                        {logFrameOutcomes.map((outcome, i) => (
+                                            <div key={i} className="p-4 bg-slate-700/30 rounded-lg mb-3">
+                                                <div className="flex justify-between items-center mb-2">
+                                                    <span className="text-sm font-medium text-indigo-400">Outcome {i + 1}</span>
+                                                    {logFrameOutcomes.length > 1 && <button onClick={() => removeLogFrameOutcome(i)} className="text-red-400 text-sm hover:text-red-300">Remove</button>}
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <input type="text" value={outcome.outcome} onChange={e => updateLogFrameOutcome(i, 'outcome', e.target.value)} placeholder="Outcome statement" className="w-full bg-slate-700 rounded px-3 py-2 text-sm" />
+                                                    <input type="text" value={outcome.indicators} onChange={e => updateLogFrameOutcome(i, 'indicators', e.target.value)} placeholder="Indicators (how will you measure?)" className="w-full bg-slate-700 rounded px-3 py-2 text-sm" />
+                                                    <input type="text" value={outcome.means} onChange={e => updateLogFrameOutcome(i, 'means', e.target.value)} placeholder="Means of Verification (data sources)" className="w-full bg-slate-700 rounded px-3 py-2 text-sm" />
+                                                    <input type="text" value={outcome.assumptions} onChange={e => updateLogFrameOutcome(i, 'assumptions', e.target.value)} placeholder="Assumptions & Risks" className="w-full bg-slate-700 rounded px-3 py-2 text-sm" />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <div>
+                                        <div className="flex justify-between items-center mb-3">
+                                            <h3 className="font-medium">Risk Matrix</h3>
+                                            <button onClick={addRisk} className="bg-indigo-600 hover:bg-indigo-500 px-3 py-1 rounded text-sm">+ Add Risk</button>
+                                        </div>
+                                        {risks.map((risk, i) => (
+                                            <div key={i} className="grid grid-cols-1 md:grid-cols-5 gap-2 mb-2 p-3 bg-slate-700/30 rounded-lg">
+                                                <input type="text" value={risk.risk} onChange={e => updateRisk(i, 'risk', e.target.value)} placeholder="Risk Description" className="bg-slate-700 rounded px-3 py-2 text-sm md:col-span-2" />
+                                                <select value={risk.likelihood} onChange={e => updateRisk(i, 'likelihood', e.target.value)} className="bg-slate-700 rounded px-3 py-2 text-sm">
+                                                    <option value="low">Low Likelihood</option>
+                                                    <option value="medium">Medium Likelihood</option>
+                                                    <option value="high">High Likelihood</option>
+                                                </select>
+                                                <select value={risk.impact} onChange={e => updateRisk(i, 'impact', e.target.value)} className="bg-slate-700 rounded px-3 py-2 text-sm">
+                                                    <option value="low">Low Impact</option>
+                                                    <option value="medium">Medium Impact</option>
+                                                    <option value="high">High Impact</option>
+                                                </select>
+                                                {risks.length > 1 && <button onClick={() => removeRisk(i)} className="bg-red-600/20 text-red-400 rounded px-3 py-2 text-sm hover:bg-red-600/40">Remove</button>}
+                                            </div>
+                                        ))}
+                                        {risks.some(r => r.risk) && (
+                                            <div className="mt-2">
+                                                {risks.filter(r => r.risk).map((risk, i) => (
+                                                    <input key={i} type="text" value={risk.mitigation} onChange={e => updateRisk(risks.findIndex(r => r.risk === risk.risk), 'mitigation', e.target.value)} placeholder={`Mitigation for: ${risk.risk.slice(0,30)}...`} className="w-full bg-slate-700 rounded px-3 py-2 text-sm mb-2" />
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Tab 4: M&E */}
+                            {activeTab === 4 && (
+                                <div className="space-y-6">
+                                    <h2 className="text-xl font-semibold flex items-center gap-2">📈 Monitoring & Evaluation</h2>
+
+                                    <div>
+                                        <div className="flex justify-between items-center mb-3">
+                                            <h3 className="font-medium">Key Performance Indicators</h3>
+                                            <button onClick={addMEIndicator} className="bg-indigo-600 hover:bg-indigo-500 px-3 py-1 rounded text-sm">+ Add Indicator</button>
+                                        </div>
+                                        {meIndicators.map((indicator, i) => (
+                                            <div key={i} className="p-4 bg-slate-700/30 rounded-lg mb-3">
+                                                <div className="flex justify-between items-center mb-2">
+                                                    <span className="text-sm font-medium text-emerald-400">Indicator {i + 1}</span>
+                                                    {meIndicators.length > 1 && <button onClick={() => removeMEIndicator(i)} className="text-red-400 text-sm hover:text-red-300">Remove</button>}
+                                                </div>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                                    <input type="text" value={indicator.indicator} onChange={e => updateMEIndicator(i, 'indicator', e.target.value)} placeholder="Indicator description" className="bg-slate-700 rounded px-3 py-2 text-sm md:col-span-2" />
+                                                    <input type="text" value={indicator.baseline} onChange={e => updateMEIndicator(i, 'baseline', e.target.value)} placeholder="Baseline value" className="bg-slate-700 rounded px-3 py-2 text-sm" />
+                                                    <input type="text" value={indicator.target} onChange={e => updateMEIndicator(i, 'target', e.target.value)} placeholder="Target value" className="bg-slate-700 rounded px-3 py-2 text-sm" />
+                                                    <input type="text" value={indicator.frequency} onChange={e => updateMEIndicator(i, 'frequency', e.target.value)} placeholder="Collection frequency" className="bg-slate-700 rounded px-3 py-2 text-sm" />
+                                                    <input type="text" value={indicator.source} onChange={e => updateMEIndicator(i, 'source', e.target.value)} placeholder="Data source" className="bg-slate-700 rounded px-3 py-2 text-sm" />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Self-Evaluation */}
+                                    <div>
+                                        <h3 className="font-medium mb-3">Self-Evaluation Scorecard</h3>
+                                        <p className="text-sm text-slate-400 mb-4">Rate your proposal against common evaluation criteria (1-5 scale)</p>
+                                        <div className="space-y-3">
+                                            {EVALUATION_CRITERIA.map(criteria => (
+                                                <div key={criteria.id} className="flex items-center gap-4 p-3 bg-slate-700/30 rounded-lg">
+                                                    <div className="flex-1">
+                                                        <span className="font-medium text-sm">{criteria.label}</span>
+                                                        <span className="text-xs text-slate-500 ml-2">({criteria.weight}% weight)</span>
+                                                        <p className="text-xs text-slate-400">{criteria.description}</p>
+                                                    </div>
+                                                    <div className="flex gap-1">
+                                                        {[1,2,3,4,5].map(score => (
+                                                            <button key={score} onClick={() => setEvaluationScores({...evaluationScores, [criteria.id]: score})} className={`w-8 h-8 rounded text-sm font-medium ${evaluationScores[criteria.id] === score ? 'bg-indigo-600' : 'bg-slate-600 hover:bg-slate-500'}`}>{score}</button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        {Object.keys(evaluationScores).length > 0 && (
+                                            <div className="mt-4 p-4 bg-indigo-900/30 rounded-lg text-center">
+                                                <span className="text-sm text-slate-400">Weighted Self-Score:</span>
+                                                <span className={`text-2xl font-bold ml-2 ${getSelfEvaluationScore() >= 80 ? 'text-emerald-400' : getSelfEvaluationScore() >= 60 ? 'text-yellow-400' : 'text-red-400'}`}>{getSelfEvaluationScore()}%</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Tab 5: Budget */}
+                            {activeTab === 5 && (
+                                <div className="space-y-6">
+                                    <h2 className="text-xl font-semibold flex items-center gap-2">💰 Budget Framework</h2>
+
+                                    <div>
+                                        <div className="flex justify-between items-center mb-3">
+                                            <h3 className="font-medium">Budget Line Items</h3>
+                                            <button onClick={addBudgetItem} className="bg-indigo-600 hover:bg-indigo-500 px-3 py-1 rounded text-sm">+ Add Item</button>
+                                        </div>
+                                        {budgetItems.map((item, i) => (
+                                            <div key={i} className="grid grid-cols-1 md:grid-cols-5 gap-2 mb-2 p-3 bg-slate-700/30 rounded-lg">
+                                                <select value={item.category} onChange={e => updateBudgetItem(i, 'category', e.target.value)} className="bg-slate-700 rounded px-3 py-2 text-sm">
+                                                    <option value="">Category</option>
+                                                    <option value="personnel">Personnel</option>
+                                                    <option value="travel">Travel & Transport</option>
+                                                    <option value="equipment">Equipment & Supplies</option>
+                                                    <option value="activities">Program Activities</option>
+                                                    <option value="admin">Admin & Overhead</option>
+                                                    <option value="me">M&E</option>
+                                                    <option value="other">Other Direct Costs</option>
+                                                </select>
+                                                <input type="text" value={item.item} onChange={e => updateBudgetItem(i, 'item', e.target.value)} placeholder="Item description" className="bg-slate-700 rounded px-3 py-2 text-sm" />
+                                                <input type="number" value={item.amount} onChange={e => updateBudgetItem(i, 'amount', e.target.value)} placeholder="Amount (USD)" className="bg-slate-700 rounded px-3 py-2 text-sm" />
+                                                <input type="text" value={item.justification} onChange={e => updateBudgetItem(i, 'justification', e.target.value)} placeholder="Justification" className="bg-slate-700 rounded px-3 py-2 text-sm" />
+                                                {budgetItems.length > 1 && <button onClick={() => removeBudgetItem(i)} className="bg-red-600/20 text-red-400 rounded px-3 py-2 text-sm hover:bg-red-600/40">Remove</button>}
+                                            </div>
+                                        ))}
+                                        {getTotalBudget() > 0 && (
+                                            <div className="mt-4 p-4 bg-emerald-900/30 rounded-lg flex justify-between items-center">
+                                                <span className="font-medium">Total Budget:</span>
+                                                <span className="text-2xl font-bold text-emerald-400">${getTotalBudget().toLocaleString()}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Tab 6: Checklist */}
+                            {activeTab === 6 && (
+                                <div className="space-y-6">
+                                    <h2 className="text-xl font-semibold flex items-center gap-2">✅ Attachment Checklist</h2>
+                                    <p className="text-sm text-slate-400">Track required and optional attachments for your proposal</p>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        {ATTACHMENT_CHECKLIST.map(att => (
+                                            <label key={att.id} className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${checkedAttachments.includes(att.id) ? 'bg-emerald-900/30' : 'bg-slate-700/30 hover:bg-slate-700/50'}`}>
+                                                <input type="checkbox" checked={checkedAttachments.includes(att.id)} onChange={() => toggleAttachment(att.id)} className="w-5 h-5 rounded" />
+                                                <span className={`text-sm ${checkedAttachments.includes(att.id) ? 'text-emerald-400' : ''}`}>
+                                                    {att.label}
+                                                    {att.required && <span className="text-red-400 ml-1">*</span>}
+                                                </span>
+                                            </label>
+                                        ))}
+                                    </div>
+
+                                    <div className="p-4 bg-slate-700/30 rounded-lg">
+                                        <div className="flex justify-between text-sm mb-2">
+                                            <span>Checklist Progress</span>
+                                            <span>{checkedAttachments.length} / {ATTACHMENT_CHECKLIST.length}</span>
+                                        </div>
+                                        <div className="w-full bg-slate-600 rounded-full h-2">
+                                            <div className="bg-emerald-500 h-2 rounded-full transition-all" style={{width: `${(checkedAttachments.length / ATTACHMENT_CHECKLIST.length) * 100}%`}}></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Tab 7: Output */}
+                            {activeTab === 7 && (
+                                <div className="space-y-6">
+                                    <h2 className="text-xl font-semibold flex items-center gap-2">🚀 Generate Proposal</h2>
+
+                                    {!generatedPrompt ? (
+                                        <div className="text-center py-12">
+                                            <button onClick={generatePrompt} className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 px-8 py-4 rounded-xl text-lg font-bold shadow-lg">
+                                                Generate Grant Proposal Prompt
+                                            </button>
+                                            <p className="text-slate-400 mt-4">Click to generate a comprehensive prompt for Claude</p>
+                                        </div>
+                                    ) : (
+                                        <div>
+                                            {copySuccess && (
+                                                <div className="bg-emerald-600/20 border border-emerald-500 text-emerald-400 px-4 py-3 rounded-lg mb-4 text-center">
+                                                    ✅ Prompt copied to clipboard! Paste into Claude to generate your proposal.
+                                                </div>
+                                            )}
+                                            <div className="bg-slate-900 rounded-lg p-4 max-h-96 overflow-y-auto">
+                                                <pre className="text-sm text-slate-300 whitespace-pre-wrap">{generatedPrompt}</pre>
+                                            </div>
+                                            <div className="flex gap-2 mt-4">
+                                                <button onClick={() => { navigator.clipboard.writeText(generatedPrompt); setCopySuccess(true); setTimeout(() => setCopySuccess(false), 3000); }} className="flex-1 bg-indigo-600 hover:bg-indigo-500 py-3 rounded-lg font-medium">
+                                                    📋 Copy to Clipboard
+                                                </button>
+                                                <button onClick={() => { const blob = new Blob([generatedPrompt], {type: 'text/plain'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'grant-proposal-prompt.txt'; a.click(); }} className="bg-slate-700 hover:bg-slate-600 px-6 py-3 rounded-lg font-medium">
+                                                    💾 Download
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Navigation Buttons */}
+                        <div className="flex justify-between mt-6 no-print">
+                            <button onClick={() => setActiveTab(Math.max(0, activeTab - 1))} disabled={activeTab === 0} className={`px-6 py-2 rounded-lg font-medium ${activeTab === 0 ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-slate-700 hover:bg-slate-600'}`}>← Previous</button>
+                            {activeTab < 7 ? (
+                                <button onClick={() => setActiveTab(activeTab + 1)} className="bg-indigo-600 hover:bg-indigo-500 px-6 py-2 rounded-lg font-medium">Next →</button>
+                            ) : (
+                                <button onClick={generatePrompt} className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 px-6 py-2 rounded-lg font-medium">Generate Prompt</button>
+                            )}
+                        </div>
+
+                        {/* Modals */}
+                        {showTips && (
+                            <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50" onClick={() => setShowTips(false)}>
+                                <div className="bg-slate-800 rounded-xl p-6 max-w-2xl max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                                    <h3 className="text-xl font-bold mb-4">💡 Grant Writing Tips</h3>
+                                    <div className="space-y-4 text-sm text-slate-300">
+                                        <div><strong className="text-emerald-400">1. Read the RFP Thoroughly</strong><p>Highlight key requirements, evaluation criteria, and deadlines. Many proposals fail because they don't address all requirements.</p></div>
+                                        <div><strong className="text-emerald-400">2. Start with the Summary</strong><p>Write your executive summary last, but make it compelling. Reviewers often form opinions here.</p></div>
+                                        <div><strong className="text-emerald-400">3. Use SMART Objectives</strong><p>Specific, Measurable, Achievable, Relevant, Time-bound. Avoid vague language.</p></div>
+                                        <div><strong className="text-emerald-400">4. Show, Don't Tell</strong><p>Use data, evidence, and examples. "We served 5,000 beneficiaries" beats "We have extensive experience."</p></div>
+                                        <div><strong className="text-emerald-400">5. Budget = Narrative</strong><p>Your budget should tell the same story as your narrative. Inconsistencies raise red flags.</p></div>
+                                        <div><strong className="text-emerald-400">6. Address Sustainability</strong><p>Funders want to know how your work will continue after their funding ends.</p></div>
+                                        <div><strong className="text-emerald-400">7. Know Your Funder</strong><p>Align your language and priorities with what the funder cares about most.</p></div>
+                                    </div>
+                                    <button onClick={() => setShowTips(false)} className="mt-6 w-full bg-indigo-600 hover:bg-indigo-500 py-2 rounded-lg">Close</button>
+                                </div>
+                            </div>
+                        )}
+
+                        {showSample && (
+                            <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50" onClick={() => setShowSample(false)}>
+                                <div className="bg-slate-800 rounded-xl p-6 max-w-3xl max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                                    <h3 className="text-xl font-bold mb-4">📋 Sample RFP Format</h3>
+                                    <pre className="text-xs text-slate-300 whitespace-pre-wrap bg-slate-900 p-4 rounded-lg">{`REQUEST FOR PROPOSALS
+Women's Economic Empowerment Program
+
+FUNDER: Example Development Foundation
+DEADLINE: [Date]
+BUDGET RANGE: $200,000 - $500,000 USD
+DURATION: 24-36 months
+
+BACKGROUND:
+The Example Development Foundation seeks proposals for innovative approaches to women's economic empowerment in rural communities.
+
+OBJECTIVES:
+1. Increase women's income by 30% through skills training
+2. Establish 50 women-led enterprises
+3. Create savings groups reaching 1,000 women
+
+ELIGIBILITY:
+- Registered NGO with 3+ years experience
+- Demonstrated track record in gender programming
+- Strong M&E capacity
+
+EVALUATION CRITERIA:
+- Technical Approach (30%)
+- Organizational Capacity (25%)
+- Cost Effectiveness (20%)
+- Innovation (15%)
+- Sustainability (10%)
+
+REQUIRED SECTIONS:
+1. Executive Summary (1 page)
+2. Organization Background (2 pages)
+3. Problem Statement (2 pages)
+4. Project Design (5 pages)
+5. M&E Plan (2 pages)
+6. Budget & Narrative (3 pages)`}</pre>
+                                    <div className="flex gap-2 mt-4">
+                                        <button onClick={() => { setManualContent(`REQUEST FOR PROPOSALS\nWomen's Economic Empowerment Program\n\nFUNDER: Example Development Foundation\nDEADLINE: [Date]\nBUDGET RANGE: $200,000 - $500,000 USD\nDURATION: 24-36 months\n\nBACKGROUND:\nThe Example Development Foundation seeks proposals for innovative approaches to women's economic empowerment in rural communities.\n\nOBJECTIVES:\n1. Increase women's income by 30% through skills training\n2. Establish 50 women-led enterprises\n3. Create savings groups reaching 1,000 women\n\nELIGIBILITY:\n- Registered NGO with 3+ years experience\n- Demonstrated track record in gender programming\n- Strong M&E capacity\n\nEVALUATION CRITERIA:\n- Technical Approach (30%)\n- Organizational Capacity (25%)\n- Cost Effectiveness (20%)\n- Innovation (15%)\n- Sustainability (10%)`); setShowSample(false); setActiveTab(0); }} className="flex-1 bg-emerald-600 hover:bg-emerald-500 py-2 rounded-lg">Use This Sample</button>
+                                        <button onClick={() => setShowSample(false)} className="flex-1 bg-slate-700 hover:bg-slate-600 py-2 rounded-lg">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {showLogFrameGuide && (
+                            <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50" onClick={() => setShowLogFrameGuide(false)}>
+                                <div className="bg-slate-800 rounded-xl p-6 max-w-2xl max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                                    <h3 className="text-xl font-bold mb-4">📊 LogFrame Guide</h3>
+                                    <div className="space-y-4 text-sm text-slate-300">
+                                        <div className="bg-slate-700/50 p-4 rounded-lg">
+                                            <strong className="text-purple-400">Goal (Impact)</strong>
+                                            <p>The long-term change your project contributes to. Example: "Reduced poverty among rural women in Region X"</p>
+                                        </div>
+                                        <div className="bg-slate-700/50 p-4 rounded-lg">
+                                            <strong className="text-purple-400">Outcomes</strong>
+                                            <p>Medium-term results achieved by the end of the project. Example: "Women have increased income from enterprise activities"</p>
+                                        </div>
+                                        <div className="bg-slate-700/50 p-4 rounded-lg">
+                                            <strong className="text-purple-400">Outputs</strong>
+                                            <p>Direct deliverables of your activities. Example: "500 women trained in business skills"</p>
+                                        </div>
+                                        <div className="bg-slate-700/50 p-4 rounded-lg">
+                                            <strong className="text-purple-400">Activities</strong>
+                                            <p>What you will do. Example: "Conduct 20 business skills training workshops"</p>
+                                        </div>
+                                        <div className="bg-slate-700/50 p-4 rounded-lg">
+                                            <strong className="text-purple-400">Indicators</strong>
+                                            <p>How you measure success. Must be SMART: Specific, Measurable, Achievable, Relevant, Time-bound</p>
+                                        </div>
+                                    </div>
+                                    <button onClick={() => setShowLogFrameGuide(false)} className="mt-6 w-full bg-indigo-600 hover:bg-indigo-500 py-2 rounded-lg">Close</button>
+                                </div>
+                            </div>
+                        )}
+
+                        {showBudgetGuide && (
+                            <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50" onClick={() => setShowBudgetGuide(false)}>
+                                <div className="bg-slate-800 rounded-xl p-6 max-w-2xl max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                                    <h3 className="text-xl font-bold mb-4">💰 Budget Categories Guide</h3>
+                                    <div className="space-y-3 text-sm">
+                                        <div className="bg-slate-700/50 p-3 rounded-lg">
+                                            <strong className="text-amber-400">Personnel (typically 40-60%)</strong>
+                                            <p className="text-slate-400">Project Manager, Technical Staff, M&E Officer, Admin Support, Consultants</p>
+                                        </div>
+                                        <div className="bg-slate-700/50 p-3 rounded-lg">
+                                            <strong className="text-amber-400">Travel & Transport (5-15%)</strong>
+                                            <p className="text-slate-400">Field visits, Training travel, International travel, Vehicle costs, Per diem</p>
+                                        </div>
+                                        <div className="bg-slate-700/50 p-3 rounded-lg">
+                                            <strong className="text-amber-400">Equipment & Supplies (5-15%)</strong>
+                                            <p className="text-slate-400">Computers, Office equipment, Training materials, Project supplies</p>
+                                        </div>
+                                        <div className="bg-slate-700/50 p-3 rounded-lg">
+                                            <strong className="text-amber-400">Program Activities (15-30%)</strong>
+                                            <p className="text-slate-400">Training workshops, Community events, Grants to beneficiaries, Technical assistance</p>
+                                        </div>
+                                        <div className="bg-slate-700/50 p-3 rounded-lg">
+                                            <strong className="text-amber-400">M&E (5-10%)</strong>
+                                            <p className="text-slate-400">Baseline/endline surveys, Data collection, External evaluation, Reporting</p>
+                                        </div>
+                                        <div className="bg-slate-700/50 p-3 rounded-lg">
+                                            <strong className="text-amber-400">Admin & Overhead (7-15%)</strong>
+                                            <p className="text-slate-400">Office rent, Utilities, Communications, Indirect costs (if allowed)</p>
+                                        </div>
+                                    </div>
+                                    <button onClick={() => setShowBudgetGuide(false)} className="mt-6 w-full bg-indigo-600 hover:bg-indigo-500 py-2 rounded-lg">Close</button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Footer */}
+                        <div className="text-center mt-8 text-slate-500 text-xs no-print">
+                            Grant Proposal Writer Pro v5.0 | Auto-saves to browser storage
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<GrantProposalWriter />);
+    </script>
+</body>
+</html>
