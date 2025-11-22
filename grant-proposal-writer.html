@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grant Proposal Writer</title>
+    <title>Grant Proposal Writer Pro</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -11,290 +11,364 @@
     <style>
         * { box-sizing: border-box; }
         body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
-        .drag-active { border-color: #4f46e5 !important; background-color: #eef2ff !important; }
+        .tooltip { position: relative; }
+        .tooltip:hover .tooltip-text { visibility: visible; opacity: 1; }
+        .tooltip-text {
+            visibility: hidden; opacity: 0; position: absolute; z-index: 10;
+            bottom: 125%; left: 50%; transform: translateX(-50%);
+            background: #1e293b; color: white; padding: 8px 12px;
+            border-radius: 6px; font-size: 12px; white-space: nowrap;
+            transition: opacity 0.2s;
+        }
+        .tooltip-text::after {
+            content: ""; position: absolute; top: 100%; left: 50%;
+            margin-left: -5px; border: 5px solid transparent;
+            border-top-color: #1e293b;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
     </style>
 </head>
 <body>
     <div id="root"></div>
     <script type="text/babel">
-        const { useState, useRef, useCallback } = React;
+        const { useState, useRef, useCallback, useEffect } = React;
 
         const PROPOSAL_TYPES = [
             { value: 'standard', label: 'Standard Grant Proposal', category: 'General' },
             { value: 'research', label: 'Research Grant', category: 'General' },
             { value: 'nonprofit', label: 'Nonprofit Program Grant', category: 'General' },
-            { value: 'education', label: 'Education/School Grant', category: 'General' },
             { value: 'community', label: 'Community Development Grant', category: 'General' },
-            { value: 'healthcare', label: 'Healthcare Grant', category: 'General' },
-            { value: 'arts', label: 'Arts & Culture Grant', category: 'General' },
-            { value: 'technology', label: 'Technology Grant', category: 'General' },
             { value: 'climate', label: 'Climate Initiative Grant', category: 'Climate & Environment' },
             { value: 'renewable_energy', label: 'Renewable Energy Grant', category: 'Climate & Environment' },
             { value: 'water_sanitation', label: 'Water & Sanitation Grant', category: 'Climate & Environment' },
-            { value: 'environmental', label: 'Environmental Grant', category: 'Climate & Environment' },
-            { value: 'biodiversity', label: 'Biodiversity Conservation Grant', category: 'Climate & Environment' },
+            { value: 'environmental', label: 'Environmental Conservation Grant', category: 'Climate & Environment' },
+            { value: 'biodiversity', label: 'Biodiversity Protection Grant', category: 'Climate & Environment' },
+            { value: 'waste_management', label: 'Waste Management Grant', category: 'Climate & Environment' },
             { value: 'sme', label: 'SME Development Grant', category: 'Business & Economic' },
             { value: 'social_enterprise', label: 'Social Enterprise Grant', category: 'Business & Economic' },
             { value: 'financial_inclusion', label: 'Financial Inclusion Grant', category: 'Business & Economic' },
             { value: 'tourism', label: 'Tourism Development Grant', category: 'Business & Economic' },
-            { value: 'trade', label: 'Trade & Export Development Grant', category: 'Business & Economic' },
+            { value: 'trade', label: 'Trade & Export Grant', category: 'Business & Economic' },
+            { value: 'startup', label: 'Startup & Innovation Grant', category: 'Business & Economic' },
+            { value: 'education_k12', label: 'K-12 Education Grant', category: 'Education' },
+            { value: 'education_higher', label: 'Higher Education Grant', category: 'Education' },
+            { value: 'education_vocational', label: 'Vocational Training Grant', category: 'Education' },
+            { value: 'education_stem', label: 'STEM Education Grant', category: 'Education' },
+            { value: 'education_literacy', label: 'Literacy Program Grant', category: 'Education' },
+            { value: 'healthcare_primary', label: 'Primary Healthcare Grant', category: 'Healthcare' },
+            { value: 'healthcare_maternal', label: 'Maternal & Child Health Grant', category: 'Healthcare' },
+            { value: 'healthcare_mental', label: 'Mental Health Grant', category: 'Healthcare' },
+            { value: 'healthcare_disease', label: 'Disease Prevention Grant', category: 'Healthcare' },
+            { value: 'healthcare_nutrition', label: 'Nutrition & Food Security Grant', category: 'Healthcare' },
             { value: 'women_empowerment', label: 'Women Empowerment Grant', category: 'Social Development' },
             { value: 'youth', label: 'Youth Development Grant', category: 'Social Development' },
             { value: 'capacity_building', label: 'Capacity Building Grant', category: 'Social Development' },
             { value: 'governance', label: 'Governance & Democracy Grant', category: 'Social Development' },
             { value: 'human_rights', label: 'Human Rights Grant', category: 'Social Development' },
             { value: 'disability', label: 'Disability Inclusion Grant', category: 'Social Development' },
-            { value: 'agriculture', label: 'Agriculture & Rural Development Grant', category: 'Infrastructure & Development' },
-            { value: 'infrastructure', label: 'Infrastructure Development Grant', category: 'Infrastructure & Development' },
-            { value: 'disaster_relief', label: 'Disaster Relief & Recovery Grant', category: 'Infrastructure & Development' },
-            { value: 'humanitarian', label: 'Humanitarian Aid Grant', category: 'Infrastructure & Development' },
-            { value: 'urban', label: 'Urban Development Grant', category: 'Infrastructure & Development' },
-            { value: 'housing', label: 'Housing & Shelter Grant', category: 'Infrastructure & Development' },
+            { value: 'refugee', label: 'Refugee & Migration Grant', category: 'Social Development' },
+            { value: 'agriculture', label: 'Agriculture Development Grant', category: 'Infrastructure' },
+            { value: 'infrastructure', label: 'Infrastructure Grant', category: 'Infrastructure' },
+            { value: 'disaster_relief', label: 'Disaster Relief Grant', category: 'Infrastructure' },
+            { value: 'humanitarian', label: 'Humanitarian Aid Grant', category: 'Infrastructure' },
+            { value: 'urban', label: 'Urban Development Grant', category: 'Infrastructure' },
+            { value: 'housing', label: 'Housing & Shelter Grant', category: 'Infrastructure' },
+            { value: 'rural', label: 'Rural Development Grant', category: 'Infrastructure' },
+            { value: 'arts', label: 'Arts & Culture Grant', category: 'Other' },
             { value: 'sports', label: 'Sports & Recreation Grant', category: 'Other' },
             { value: 'media', label: 'Media & Journalism Grant', category: 'Other' },
             { value: 'digital', label: 'Digital Transformation Grant', category: 'Other' },
+            { value: 'technology', label: 'Technology & Innovation Grant', category: 'Other' },
         ];
 
-        const GRANT_WRITER_PROMPT = `You are a world-class grant proposal writer with 20+ years of experience securing funding for diverse organizations. You have successfully written proposals that have secured over $500 million in funding across various sectors including climate initiatives, SME development, agriculture, education, healthcare, and humanitarian aid.
+        const SAMPLE_RFP = `SAMPLE GRANT OPPORTUNITY
 
-Your expertise includes:
+Organization: International Development Foundation
+Grant Title: Community Resilience Program 2024
+Funding Available: $50,000 - $250,000
+Duration: 12-24 months
+
+ELIGIBILITY:
+- Registered non-profit organizations
+- Minimum 3 years operational experience
+- Previous grant management experience
+
+FOCUS AREAS:
+- Climate adaptation
+- Livelihood diversification
+- Community capacity building
+
+EVALUATION CRITERIA (100 points):
+1. Technical Approach (30 points)
+2. Organizational Capacity (25 points)
+3. Innovation (20 points)
+4. Sustainability (15 points)
+5. Budget Reasonableness (10 points)
+
+REQUIRED SECTIONS:
+1. Executive Summary (max 2 pages)
+2. Organizational Background
+3. Problem Statement & Needs Assessment
+4. Project Description & Methodology
+5. Work Plan & Timeline
+6. Monitoring & Evaluation Plan
+7. Budget & Budget Narrative
+8. Sustainability Plan
+
+DEADLINE: March 15, 2024`;
+
+        const GRANT_WRITER_PROMPT = `You are a world-class grant proposal writer with 25+ years of experience securing funding for diverse organizations globally. You have personally written and reviewed over 1,000 successful proposals that have secured more than $750 million in funding across sectors including climate, SME development, agriculture, education, healthcare, humanitarian aid, and governance.
+
+YOUR CREDENTIALS & EXPERTISE:
+- Former Grant Review Panel Member for USAID, EU, and major foundations
+- Certified Grant Professional (GPC) with expertise in federal and private funding
+- Published author on grant writing best practices
 - Deep understanding of funder psychology and evaluation criteria
 - Mastery of persuasive writing techniques specific to grant applications
-- Ability to translate complex projects into compelling narratives
-- Knowledge of budget development and financial justification
-- Experience with international donor requirements (USAID, World Bank, EU, GIZ, DFID/FCDO, bilateral donors, private foundations)
-- Familiarity with logical framework (LogFrame) and results-based management
-- Understanding of cross-cutting themes (gender, environment, social inclusion)
+- Expert in logical framework (LogFrame), Theory of Change, and results-based management
+- Experience with international donor requirements (USAID, World Bank, EU, GIZ, DFID/FCDO, SIDA, JICA, bilateral donors, private foundations)
+- Understanding of cross-cutting themes (gender mainstreaming, environmental sustainability, social inclusion, conflict sensitivity)
 
-CRITICAL INSTRUCTIONS FOR PROPOSAL WRITING:
+CRITICAL ANALYSIS PHASE - DO THIS FIRST:
 
-1. DOCUMENT ANALYSIS PHASE:
-   - Carefully analyze ALL uploaded grant documents, RFPs, and guidelines
-   - Identify the funder's priorities, evaluation criteria, and scoring rubric
-   - Note specific requirements for format, length, and required sections
-   - Extract key terminology and language preferences of the funder
-   - Identify submission deadlines and eligibility requirements
-   - Note any mandatory partnerships or co-funding requirements
+Before writing, you MUST analyze the grant documents and extract:
+1. FUNDER PROFILE: Organization type, strategic priorities, geographic focus
+2. ELIGIBILITY: Who can apply, partnership requirements, registration needs
+3. FUNDING DETAILS: Amount range, duration, cost-share requirements
+4. EVALUATION CRITERIA: Scoring rubric, weighted criteria, review process
+5. REQUIRED SECTIONS: Exact sections needed, page/word limits
+6. SUBMISSION REQUIREMENTS: Deadlines, format, annexes needed
+7. KEY TERMINOLOGY: Funder's preferred language and buzzwords
+8. RED FLAGS: Common rejection reasons to avoid
 
-2. PROPOSAL STRUCTURE (Adapt based on grant type and requirements):
+COMPREHENSIVE PROPOSAL STRUCTURE:
 
-   A. COVER PAGE & EXECUTIVE SUMMARY (1-2 pages)
-   - Project title (concise, descriptive, memorable)
-   - Applicant organization name and contact details
-   - Total funding requested and project duration
-   - Clear problem statement in 2-3 sentences
-   - Proposed solution overview with innovation highlights
-   - Expected outcomes and key impact metrics
-   - Geographic focus and number of direct/indirect beneficiaries
-   - Key implementing partners and their roles
+A. COVER PAGE & EXECUTIVE SUMMARY (Critical - Reviewers read this first!)
+   - Compelling project title that captures essence and impact
+   - Applicant details: Organization name, registration, contact person
+   - Funding request: Total amount, project duration, cost per beneficiary
+   - One-paragraph problem statement with shocking/compelling statistics
+   - Solution overview highlighting innovation and unique approach
+   - Expected impact: 3-5 key outcome metrics with numbers
+   - Geographic scope and beneficiary numbers (direct + indirect)
+   - Key partners listed with their specific roles
 
-   B. ORGANIZATIONAL BACKGROUND & CAPACITY (2-3 pages)
-   - Organization history, legal status, and registration details
-   - Mission, vision, and core values alignment with funder
-   - Relevant experience and past successes with similar projects
-   - Key staff qualifications, expertise, and availability
-   - Organizational structure, governance, and accountability mechanisms
-   - Financial stability, audit history, and fiduciary capacity
-   - Current programs, achievements, and lessons learned
-   - Previous grants managed (amounts, donors, outcomes)
+B. ORGANIZATIONAL BACKGROUND & CAPACITY (Prove you can deliver)
+   - Organization founding story and evolution
+   - Legal status, registration numbers, governance structure
+   - Mission-vision alignment with funder's priorities
+   - Track record: Similar projects, success metrics, lessons learned
+   - Key personnel: Names, qualifications, % time commitment
+   - Organizational chart and reporting structure
+   - Financial health: Budget size, audit status, reserves
+   - Past donor relationships and performance ratings
+   - Awards, recognition, or accreditations
 
-   C. NEEDS ASSESSMENT & PROBLEM STATEMENT (2-3 pages)
-   - Data-driven description of the problem with recent statistics
-   - Root cause analysis using problem tree or similar methodology
-   - Geographic and demographic context with maps if relevant
-   - Evidence from credible sources (government data, UN reports, academic research)
-   - Primary research: voices from the community/beneficiaries
-   - Stakeholder analysis and community consultation summary
-   - Gap analysis - why existing solutions are insufficient
-   - Urgency and timeliness of intervention
-   - Alignment with national development priorities/SDGs
+C. NEEDS ASSESSMENT & PROBLEM STATEMENT (Make them feel the urgency)
+   - Opening hook: Compelling story or startling statistic
+   - Problem description with recent, credible data (cite sources!)
+   - Root cause analysis: Problem tree or fishbone diagram approach
+   - Geographic and demographic context with specifics
+   - Affected population: Who suffers, how many, how severely
+   - Consequences of inaction: What happens if nothing changes
+   - Gap analysis: Why current solutions are inadequate
+   - Stakeholder voices: Quotes from community consultations
+   - Alignment with national priorities, SDGs, funder strategy
 
-   D. PROJECT DESCRIPTION (4-6 pages)
-   - Theory of Change with clear causal pathways
-   - Logical Framework Matrix (Goal, Outcomes, Outputs, Activities)
-   - SMART Objectives (Specific, Measurable, Achievable, Relevant, Time-bound)
-   - Detailed activities with methodologies and approaches
-   - Innovation and unique value proposition
-   - Target beneficiaries (primary and secondary) with selection criteria
-   - Geographic scope, site selection criteria, and phasing approach
-   - Project timeline with milestones and deliverables
-   - Risk analysis matrix with probability, impact, and mitigation strategies
-   - Cross-cutting themes: gender, environment, disability inclusion
+D. PROJECT DESCRIPTION (Your solution - be specific!)
+   - Theory of Change: If we do X, then Y will happen, because Z
+   - Logical Framework Matrix with:
+     * Goal (long-term impact)
+     * Outcomes (medium-term changes)
+     * Outputs (deliverables)
+     * Activities (what you'll do)
+     * Indicators (how you'll measure)
+     * Means of Verification (data sources)
+     * Assumptions and Risks
+   - SMART Objectives: Each must be Specific, Measurable, Achievable, Relevant, Time-bound
+   - Detailed methodology for each activity
+   - Innovation: What's new or different about your approach
+   - Target beneficiaries with selection criteria
+   - Geographic targeting rationale
+   - Implementation phases and milestones
+   - Risk matrix: Risk, Probability, Impact, Mitigation Strategy
+   - Cross-cutting themes integration
 
-   E. IMPLEMENTATION PLAN (2-3 pages)
-   - Detailed work plan/activity timeline (Gantt chart description)
-   - Phase-by-phase implementation approach
-   - Resource allocation plan (human, financial, material)
-   - Staff roles, responsibilities, and reporting lines
-   - Procurement plan and compliance with funder regulations
-   - Quality assurance and quality control mechanisms
-   - Coordination mechanisms with stakeholders and government
-   - Community engagement and participation strategy
+E. IMPLEMENTATION & MANAGEMENT PLAN
+   - Detailed work plan with Gantt chart description
+   - Phase 1, 2, 3 breakdown with deliverables
+   - Resource requirements: Staff, equipment, materials
+   - Procurement approach compliant with funder rules
+   - Team structure with clear roles and responsibilities
+   - Decision-making processes and escalation procedures
+   - Quality assurance mechanisms
+   - Stakeholder coordination plan
+   - Government engagement strategy
+   - Community participation mechanisms
 
-   F. MONITORING, EVALUATION & LEARNING (2-3 pages)
-   - M&E framework aligned with logical framework
-   - Key Performance Indicators (KPIs) with baselines, targets, and data sources
-   - Data collection methods, tools, and frequency
+F. MONITORING, EVALUATION & LEARNING (MEL)
+   - MEL framework aligned with logical framework
+   - Indicator Reference Sheet for each KPI:
+     * Indicator definition and calculation
+     * Baseline value and target
+     * Data source and collection method
+     * Frequency and responsible person
+   - Data collection tools and methods
    - Data quality assurance procedures
-   - Evaluation design: process, outcome, and impact evaluation
-   - Learning agenda and adaptive management approach
-   - Feedback mechanisms and beneficiary accountability
-   - Reporting schedule and formats
-   - Third-party evaluation plans if required
-   - Knowledge management and documentation strategy
+   - Evaluation design: Baseline, midline, endline
+   - Learning agenda with key learning questions
+   - Adaptive management approach
+   - Beneficiary feedback mechanisms
+   - Reporting schedule and templates
+   - Knowledge management and documentation
 
-   G. SUSTAINABILITY PLAN (1-2 pages)
-   - Financial sustainability: revenue diversification, cost recovery, local funding
-   - Institutional sustainability: capacity building, ownership transfer
-   - Technical sustainability: technology transfer, maintenance plans
-   - Social sustainability: community ownership, behavior change
-   - Environmental sustainability: climate resilience, resource management
-   - Exit strategy with handover timeline
-   - Scaling and replication potential
-   - Policy influence and systems change approach
+G. SUSTAINABILITY & EXIT STRATEGY
+   - Financial sustainability: Revenue streams post-grant
+   - Institutional sustainability: Local ownership plan
+   - Technical sustainability: Capacity building, technology transfer
+   - Social sustainability: Behavior change, community ownership
+   - Environmental sustainability: Climate-proofing
+   - Exit strategy with specific handover timeline
+   - Scaling potential and replication plan
+   - Policy influence and systems change
 
-   H. BUDGET & BUDGET NARRATIVE (3-4 pages)
-   - Detailed line-item budget by activity/output
-   - Budget categories: personnel, equipment, travel, supplies, other direct costs
-   - Budget narrative justifying each major cost item
-   - Unit costs and calculation methodology
-   - Cost-effectiveness analysis and value for money
-   - Co-funding and matching contributions (cash and in-kind)
-   - Indirect cost/overhead rate justification
-   - Multi-year budget breakdown with inflation adjustments
-   - Budget flexibility and contingency provisions
+H. BUDGET & BUDGET NARRATIVE
+   - Detailed line-item budget by:
+     * Activity/Output
+     * Budget category (personnel, equipment, travel, etc.)
+     * Year (for multi-year projects)
+   - Budget narrative justifying EVERY significant cost
+   - Unit cost calculations shown
+   - Cost-effectiveness comparison with alternatives
+   - Value for money demonstration
+   - Co-funding and matching contributions
+   - Indirect cost rate with justification
+   - Contingency provisions (if allowed)
 
-   I. PARTNERSHIPS & COLLABORATION (1-2 pages)
-   - Key partners: roles, responsibilities, and value-add
-   - Partnership agreements and MOUs
-   - Coordination mechanisms and governance structure
-   - Community-based organizations and local NGO involvement
-   - Government engagement at national/local levels
-   - Private sector partnerships
-   - Academic/research institution collaboration
-   - Letters of support summary
+I. PARTNERSHIPS & STAKEHOLDERS
+   - Partner mapping with roles and responsibilities
+   - Partnership agreements (reference MOUs)
+   - Coordination mechanisms
+   - Community engagement approach
+   - Government relationships at all levels
+   - Private sector linkages
+   - Academic/research partnerships
 
-   J. ANNEXES (list required documents)
-   - Organizational registration/legal documents
-   - Latest audited financial statements (2-3 years)
-   - Annual reports
-   - Key staff CVs
-   - Letters of support/commitment
-   - Logical framework matrix
-   - Detailed work plan/Gantt chart
-   - Detailed budget in Excel format
-   - Past performance references
-   - Organizational policies (safeguarding, anti-fraud, gender)
-   - Maps and photos
+SECTOR-SPECIFIC EXCELLENCE:
 
-3. WRITING STYLE GUIDELINES:
-   - Use active voice and strong action verbs
-   - Be specific and quantify wherever possible (numbers, percentages, timelines)
-   - Avoid jargon unless funder-specific; define acronyms
-   - Mirror the funder's terminology, priorities, and strategic objectives
-   - Keep sentences concise (max 25 words) and paragraphs focused
-   - Use headers, subheaders, bullet points, and white space
-   - Ensure logical flow and smooth transitions between sections
-   - Address ALL evaluation criteria explicitly and in order
-   - Front-load key information in each section
-   - Use evidence and data to support all claims
+For CLIMATE/ENVIRONMENT grants:
+- GHG emission reduction calculations (tons CO2e)
+- Climate vulnerability assessments
+- Adaptation AND mitigation components
+- Paris Agreement/NDC alignment
+- Climate co-benefits quantified
+- Environmental and Social Impact Assessment
 
-4. SECTOR-SPECIFIC CONSIDERATIONS:
+For SME/ECONOMIC grants:
+- Job creation metrics (direct, indirect, by gender/youth)
+- Market analysis with demand evidence
+- Business model viability demonstration
+- Investment leverage and crowding-in
+- Value chain analysis
+- Financial inclusion metrics
 
-   For CLIMATE INITIATIVE grants:
-   - Emphasize carbon reduction metrics (tons CO2e avoided/reduced)
-   - Include climate vulnerability and risk assessments
-   - Address both adaptation and mitigation components
-   - Reference Paris Agreement, NDCs, and national climate policies
-   - Include greenhouse gas emission calculations methodology
-   - Address climate co-benefits (health, livelihoods, biodiversity)
-   - Include climate finance tracking and reporting
+For HEALTHCARE grants:
+- Health outcome metrics (mortality, morbidity reduction)
+- Health system strengthening components
+- Community health worker involvement
+- Supply chain and logistics
+- Quality of care indicators
+- Integration with national health systems
 
-   For SME DEVELOPMENT grants:
-   - Focus on job creation metrics (direct, indirect, by gender/youth)
-   - Include market analysis, demand assessment, and business viability
-   - Address access to finance, markets, and business development services
-   - Include entrepreneurship ecosystem strengthening
-   - Demonstrate private sector engagement and investment leverage
-   - Address value chain development and market linkages
-   - Include business formalization and regulatory compliance
+For EDUCATION grants:
+- Learning outcome measurements
+- Enrollment and retention rates
+- Teacher training quality metrics
+- Curriculum alignment
+- Education system integration
+- Technology-enhanced learning
 
-   For AGRICULTURE & RURAL DEVELOPMENT:
-   - Include food security and nutrition outcome metrics
-   - Address climate-smart agriculture practices
-   - Include comprehensive value chain analysis
-   - Address land tenure, water rights, and resource access
-   - Include farmer organization strengthening (cooperatives, associations)
-   - Address post-harvest losses and storage solutions
-   - Include market access and price information systems
+For HUMANITARIAN grants:
+- Sphere/CHS standards compliance
+- Protection mainstreaming
+- AAP (Accountability to Affected Populations)
+- Cluster coordination
+- Do No Harm analysis
+- Nexus approach (humanitarian-development-peace)
 
-   For WOMEN EMPOWERMENT grants:
-   - Include robust gender analysis using recognized frameworks
-   - Provide sex-disaggregated data and gender-specific indicators
-   - Address gender-based violence prevention and response
-   - Include women's economic empowerment metrics
-   - Address leadership, voice, and decision-making participation
-   - Include intersectionality (age, disability, ethnicity, location)
-   - Address unpaid care work and time poverty
-   - Include male engagement strategies
+WRITING EXCELLENCE STANDARDS:
+- Active voice, strong verbs
+- Specific numbers, not vague claims
+- Evidence for every assertion
+- Funder's terminology mirrored throughout
+- Front-load key information
+- One idea per paragraph
+- Clear transitions between sections
+- Professional but passionate tone
+- Proofread for errors
 
-   For YOUTH DEVELOPMENT grants:
-   - Include youth-specific indicators and age-disaggregated data
-   - Address education-to-employment pathways
-   - Include skills development and vocational training
-   - Address youth entrepreneurship and self-employment
-   - Include civic engagement and leadership development
-   - Address mental health and psychosocial support
-   - Include digital skills and technology access
+QUALITY ASSURANCE CHECKLIST:
+✓ All RFP requirements addressed
+✓ Evaluation criteria explicitly covered
+✓ Budget matches narrative exactly
+✓ Realistic timeline with buffer
+✓ All objectives are SMART
+✓ Theory of change is logical
+✓ Evidence cited properly
+✓ Sustainability is credible
+✓ Risks have mitigations
+✓ M&E framework complete
+✓ Page/word limits respected
+✓ Required annexes listed
+✓ Contact information correct
+✓ Signatures/authorizations noted`;
 
-   For HUMANITARIAN AID grants:
-   - Reference humanitarian standards (Sphere, CHS, HAP)
-   - Include rapid needs assessment and response mechanisms
-   - Address protection mainstreaming and safeguarding
-   - Include coordination with UN/OCHA cluster system
-   - Address do-no-harm and conflict sensitivity
-   - Include accountability to affected populations (AAP)
-   - Address nexus approach (humanitarian-development-peace)
+        // Tooltip component
+        const Tooltip = ({ text, children }) => (
+            <div className="tooltip inline-block">
+                {children}
+                <span className="tooltip-text">{text}</span>
+            </div>
+        );
 
-   For GOVERNANCE & DEMOCRACY grants:
-   - Include citizen participation and civic space indicators
-   - Address transparency and accountability mechanisms
-   - Include anti-corruption and integrity measures
-   - Address access to justice and rule of law
-   - Include civil society strengthening
-   - Address human rights monitoring and reporting
-   - Include election support and political participation
-
-5. QUALITY CHECKLIST:
-   [ ] All funder requirements and eligibility criteria addressed
-   [ ] Consistent terminology and messaging throughout
-   [ ] Budget aligns perfectly with narrative activities
-   [ ] Timeline is realistic with appropriate sequencing
-   [ ] All objectives are SMART with clear indicators
-   [ ] Clear theory of change with logical causal pathways
-   [ ] Evidence-based approach with proper citations
-   [ ] Sustainability comprehensively addressed
-   [ ] Risk mitigation strategies for all major risks
-   [ ] M&E framework complete with baselines and targets
-   [ ] All required sections included in correct order
-   [ ] Word/page limits respected with buffer
-   [ ] Cross-cutting themes adequately addressed
-   [ ] Letters of support obtained and referenced
-   [ ] Budget calculations verified and realistic
-   [ ] Document professionally formatted and proofread`;
+        // Progress indicator component
+        const ProgressBar = ({ currentStep, totalSteps }) => (
+            <div className="flex items-center gap-2 mb-6">
+                {[1, 2, 3].map((step) => (
+                    <React.Fragment key={step}>
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
+                            step < currentStep ? 'bg-green-500 text-white' :
+                            step === currentStep ? 'bg-indigo-600 text-white' :
+                            'bg-slate-200 text-slate-500'
+                        }`}>
+                            {step < currentStep ? '✓' : step}
+                        </div>
+                        {step < 3 && (
+                            <div className={`flex-1 h-1 rounded ${
+                                step < currentStep ? 'bg-green-500' : 'bg-slate-200'
+                            }`} />
+                        )}
+                    </React.Fragment>
+                ))}
+            </div>
+        );
 
         function GrantProposalWriter() {
             const [inputMode, setInputMode] = useState('paste');
             const [files, setFiles] = useState([]);
             const [pastedText, setPastedText] = useState('');
             const [proposalType, setProposalType] = useState('standard');
+            const [projectTitle, setProjectTitle] = useState('');
             const [orgDetails, setOrgDetails] = useState({
                 name: '',
                 mission: '',
                 location: '',
                 budgetRequest: '',
                 projectDuration: '',
-                beneficiaries: ''
+                beneficiaries: '',
+                experience: '',
+                website: ''
             });
             const [additionalContext, setAdditionalContext] = useState('');
             const [generatedPrompt, setGeneratedPrompt] = useState('');
@@ -304,250 +378,196 @@ CRITICAL INSTRUCTIONS FOR PROPOSAL WRITING:
             const [isDragging, setIsDragging] = useState(false);
             const [showPreview, setShowPreview] = useState(false);
             const [activeTab, setActiveTab] = useState('input');
+            const [showSample, setShowSample] = useState(false);
+            const [savedNotice, setSavedNotice] = useState(false);
             const fileInputRef = useRef(null);
-            const dropZoneRef = useRef(null);
+
+            // Auto-save to localStorage
+            useEffect(() => {
+                const saved = localStorage.getItem('grantProposalDraft');
+                if (saved) {
+                    try {
+                        const data = JSON.parse(saved);
+                        if (data.pastedText) setPastedText(data.pastedText);
+                        if (data.proposalType) setProposalType(data.proposalType);
+                        if (data.projectTitle) setProjectTitle(data.projectTitle);
+                        if (data.orgDetails) setOrgDetails(data.orgDetails);
+                        if (data.additionalContext) setAdditionalContext(data.additionalContext);
+                    } catch (e) {
+                        console.error('Error loading saved draft:', e);
+                    }
+                }
+            }, []);
+
+            useEffect(() => {
+                const data = { pastedText, proposalType, projectTitle, orgDetails, additionalContext };
+                localStorage.setItem('grantProposalDraft', JSON.stringify(data));
+            }, [pastedText, proposalType, projectTitle, orgDetails, additionalContext]);
+
+            const saveProgress = () => {
+                setSavedNotice(true);
+                setTimeout(() => setSavedNotice(false), 2000);
+            };
 
             // Drag and drop handlers
-            const handleDrag = useCallback((e) => {
-                e.preventDefault();
-                e.stopPropagation();
-            }, []);
-
+            const handleDrag = useCallback((e) => { e.preventDefault(); e.stopPropagation(); }, []);
             const handleDragIn = useCallback((e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
-                    setIsDragging(true);
-                }
+                e.preventDefault(); e.stopPropagation();
+                if (e.dataTransfer.items?.length > 0) setIsDragging(true);
             }, []);
-
-            const handleDragOut = useCallback((e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setIsDragging(false);
-            }, []);
-
+            const handleDragOut = useCallback((e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); }, []);
             const handleDrop = useCallback((e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setIsDragging(false);
-
-                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-                    handleFilesSelected(Array.from(e.dataTransfer.files));
-                }
+                e.preventDefault(); e.stopPropagation(); setIsDragging(false);
+                if (e.dataTransfer.files?.length > 0) handleFilesSelected(Array.from(e.dataTransfer.files));
             }, []);
 
-            const handleFileChange = (e) => {
-                handleFilesSelected(Array.from(e.target.files));
-            };
+            const handleFileChange = (e) => handleFilesSelected(Array.from(e.target.files));
 
             const handleFilesSelected = async (selectedFiles) => {
                 const processedFiles = [];
-                const warnings = [];
-
                 for (const file of selectedFiles) {
-                    // Check file size (max 5MB)
-                    if (file.size > 5 * 1024 * 1024) {
-                        warnings.push(`${file.name}: File too large (max 5MB). Skipped.`);
-                        continue;
-                    }
-
+                    if (file.size > 5 * 1024 * 1024) continue;
                     try {
-                        let content = '';
-                        let warning = '';
-
-                        // Handle different file types
-                        if (file.type === 'application/pdf') {
-                            warning = 'PDF files may not extract text correctly. For best results, copy and paste the text directly.';
-                            content = await readFileAsText(file);
-                            // Check if content looks like binary
-                            if (content.includes('%PDF') || /[\x00-\x08\x0E-\x1F]/.test(content.substring(0, 1000))) {
-                                content = `[PDF file: ${file.name} - Text extraction not supported in browser. Please copy and paste the PDF content manually.]`;
-                            }
-                        } else if (file.name.endsWith('.docx')) {
-                            warning = 'Word files may not extract correctly. For best results, copy and paste the text directly.';
-                            content = await readFileAsText(file);
-                            // DOCX files are actually ZIP archives
-                            if (content.includes('PK')) {
-                                content = `[Word file: ${file.name} - Text extraction not supported in browser. Please copy and paste the document content manually.]`;
-                            }
-                        } else {
-                            content = await readFileAsText(file);
-                        }
-
-                        processedFiles.push({
-                            name: file.name,
-                            type: file.type,
-                            size: file.size,
-                            content: content,
-                            warning: warning
+                        let content = await new Promise((resolve, reject) => {
+                            const reader = new FileReader();
+                            reader.onload = (e) => resolve(e.target.result);
+                            reader.onerror = reject;
+                            reader.readAsText(file);
                         });
-                    } catch (err) {
-                        warnings.push(`${file.name}: Error reading file.`);
-                        console.error(`Error reading ${file.name}:`, err);
-                    }
-                }
 
-                if (warnings.length > 0) {
-                    setError(warnings.join(' '));
-                } else {
-                    setError('');
+                        let warning = '';
+                        if (file.type === 'application/pdf' && (content.includes('%PDF') || /[\x00-\x08\x0E-\x1F]/.test(content.substring(0, 500)))) {
+                            content = `[PDF: ${file.name} - Please copy/paste text manually]`;
+                            warning = 'Binary PDF - paste text instead';
+                        } else if (file.name.endsWith('.docx') && content.includes('PK')) {
+                            content = `[Word: ${file.name} - Please copy/paste text manually]`;
+                            warning = 'Binary DOCX - paste text instead';
+                        }
+                        processedFiles.push({ name: file.name, size: file.size, content, warning });
+                    } catch (err) { console.error(err); }
                 }
-
                 setFiles(prev => [...prev, ...processedFiles]);
             };
 
-            const readFileAsText = (file) => {
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = (e) => resolve(e.target.result);
-                    reader.onerror = reject;
-                    reader.readAsText(file);
-                });
+            const getCharCount = () => inputMode === 'upload'
+                ? files.reduce((acc, f) => acc + (f.content?.length || 0), 0)
+                : pastedText.length;
+
+            const getWordCount = () => {
+                const text = inputMode === 'upload'
+                    ? files.map(f => f.content).join(' ')
+                    : pastedText;
+                return text.split(/\s+/).filter(w => w).length;
             };
 
-            const removeFile = (index) => {
-                setFiles(prev => prev.filter((_, i) => i !== index));
+            const getCompletionPercent = () => {
+                let score = 0;
+                if (getCharCount() > 100) score += 40;
+                if (projectTitle) score += 15;
+                if (orgDetails.name) score += 15;
+                if (orgDetails.location) score += 10;
+                if (orgDetails.budgetRequest) score += 10;
+                if (orgDetails.beneficiaries) score += 10;
+                return Math.min(score, 100);
             };
 
             const clearAll = () => {
-                setFiles([]);
-                setPastedText('');
-                setOrgDetails({
-                    name: '',
-                    mission: '',
-                    location: '',
-                    budgetRequest: '',
-                    projectDuration: '',
-                    beneficiaries: ''
-                });
-                setAdditionalContext('');
-                setGeneratedPrompt('');
-                setError('');
-                setCopySuccess(false);
+                setFiles([]); setPastedText(''); setProjectTitle('');
+                setOrgDetails({ name: '', mission: '', location: '', budgetRequest: '', projectDuration: '', beneficiaries: '', experience: '', website: '' });
+                setAdditionalContext(''); setGeneratedPrompt(''); setError(''); setCopySuccess(false);
+                localStorage.removeItem('grantProposalDraft');
             };
 
-            const getProposalTypeLabel = () => {
-                return PROPOSAL_TYPES.find(t => t.value === proposalType)?.label || 'Grant Proposal';
+            const loadSample = () => {
+                setPastedText(SAMPLE_RFP);
+                setShowSample(false);
             };
 
-            const getCharacterCount = () => {
-                if (inputMode === 'upload') {
-                    return files.reduce((acc, f) => acc + (f.content?.length || 0), 0);
-                }
-                return pastedText.length;
-            };
-
-            const formatFileSize = (bytes) => {
-                if (bytes < 1024) return bytes + ' B';
-                if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-                return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-            };
+            const getProposalTypeLabel = () => PROPOSAL_TYPES.find(t => t.value === proposalType)?.label || 'Grant Proposal';
 
             const generatePrompt = () => {
                 setIsGenerating(true);
                 setError('');
-                setCopySuccess(false);
 
                 const documentContent = inputMode === 'upload'
-                    ? files.map(f => `\n--- Document: ${f.name} ---\n${f.content}`).join('\n\n')
+                    ? files.map(f => `\n--- ${f.name} ---\n${f.content}`).join('\n\n')
                     : pastedText;
 
                 if (!documentContent.trim()) {
-                    setError('Please provide grant documents either by uploading files or pasting text.');
+                    setError('Please provide grant documents.');
                     setIsGenerating(false);
                     return;
                 }
 
-                // Build organization context
                 const orgContext = [];
-                if (orgDetails.name) orgContext.push(`Organization Name: ${orgDetails.name}`);
+                if (projectTitle) orgContext.push(`Project Title: ${projectTitle}`);
+                if (orgDetails.name) orgContext.push(`Organization: ${orgDetails.name}`);
                 if (orgDetails.mission) orgContext.push(`Mission: ${orgDetails.mission}`);
-                if (orgDetails.location) orgContext.push(`Geographic Location/Focus: ${orgDetails.location}`);
+                if (orgDetails.location) orgContext.push(`Location/Focus: ${orgDetails.location}`);
                 if (orgDetails.budgetRequest) orgContext.push(`Budget Request: ${orgDetails.budgetRequest}`);
-                if (orgDetails.projectDuration) orgContext.push(`Project Duration: ${orgDetails.projectDuration}`);
+                if (orgDetails.projectDuration) orgContext.push(`Duration: ${orgDetails.projectDuration}`);
                 if (orgDetails.beneficiaries) orgContext.push(`Target Beneficiaries: ${orgDetails.beneficiaries}`);
-                if (additionalContext) orgContext.push(`Additional Context: ${additionalContext}`);
+                if (orgDetails.experience) orgContext.push(`Relevant Experience: ${orgDetails.experience}`);
+                if (orgDetails.website) orgContext.push(`Website: ${orgDetails.website}`);
+                if (additionalContext) orgContext.push(`Additional Notes: ${additionalContext}`);
 
                 const fullPrompt = `${GRANT_WRITER_PROMPT}
 
----
-
-GRANT DOCUMENTS PROVIDED:
+═══════════════════════════════════════════════════════════════════
+GRANT DOCUMENTS TO ANALYZE:
+═══════════════════════════════════════════════════════════════════
 
 ${documentContent}
 
----
-
+═══════════════════════════════════════════════════════════════════
 APPLICANT INFORMATION:
+═══════════════════════════════════════════════════════════════════
 
-${orgContext.length > 0 ? orgContext.join('\n') : 'Not provided - please use general best practices and ask clarifying questions if needed.'}
+${orgContext.length > 0 ? orgContext.join('\n') : 'Not provided - use best practices and ask clarifying questions.'}
 
-Proposal Type Requested: ${getProposalTypeLabel()}
+Proposal Type: ${getProposalTypeLabel()}
 
----
+═══════════════════════════════════════════════════════════════════
+YOUR TASK:
+═══════════════════════════════════════════════════════════════════
 
-TASK:
+Write a COMPLETE, SUBMISSION-READY ${getProposalTypeLabel()} based on the documents above.
 
-Based on the grant documents provided above, please write a comprehensive, submission-ready ${getProposalTypeLabel()}.
+REQUIRED ACTIONS:
+1. ANALYZE the RFP thoroughly - identify ALL requirements, criteria, and funder priorities
+2. CREATE detailed outline addressing every required section
+3. WRITE each section with compelling, evidence-based content
+4. ALIGN language with funder's terminology and strategic priorities
+5. INCLUDE specific metrics, targets, and outcomes throughout
+6. PROVIDE realistic timelines, budgets, and implementation details
+7. ADDRESS sustainability, risks, and cross-cutting themes
+8. FORMAT professionally with clear headers and structure
 
-IMPORTANT INSTRUCTIONS:
-1. First, analyze the grant documents to identify ALL requirements, evaluation criteria, and funder priorities
-2. Create a detailed outline that addresses every required section mentioned in the RFP/guidelines
-3. Write each section with compelling, evidence-based content that directly addresses evaluation criteria
-4. Use the funder's exact terminology and align with their strategic priorities
-5. Include specific, quantifiable metrics, targets, and outcomes throughout
-6. Provide realistic timelines, detailed budgets, and implementation frameworks
-7. Address sustainability, risk mitigation, and cross-cutting themes comprehensively
-8. Ensure the proposal is professionally formatted with clear section headers
+OUTPUT: Complete proposal ready for submission with minimal editing. Include all sections, be specific with numbers and timelines, and ensure every evaluation criterion is explicitly addressed.
 
-Please write the complete proposal now. Format it professionally with clear section headers, subheaders, and bullet points where appropriate. The proposal should be ready for submission with minimal editing.`;
+BEGIN WRITING THE COMPLETE PROPOSAL NOW:`;
 
                 setGeneratedPrompt(fullPrompt);
                 setActiveTab('output');
 
-                // Copy to clipboard with fallback
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                    navigator.clipboard.writeText(fullPrompt).then(() => {
-                        setCopySuccess(true);
-                        setTimeout(() => setCopySuccess(false), 4000);
-                    }).catch(err => {
-                        console.error('Clipboard API failed:', err);
-                        fallbackCopyToClipboard(fullPrompt);
-                    });
-                } else {
-                    fallbackCopyToClipboard(fullPrompt);
-                }
-
-                setIsGenerating(false);
-            };
-
-            const fallbackCopyToClipboard = (text) => {
-                const textArea = document.createElement('textarea');
-                textArea.value = text;
-                textArea.style.position = 'fixed';
-                textArea.style.left = '-999999px';
-                document.body.appendChild(textArea);
-                textArea.select();
-                try {
-                    document.execCommand('copy');
+                // Copy to clipboard
+                navigator.clipboard?.writeText(fullPrompt).then(() => {
                     setCopySuccess(true);
                     setTimeout(() => setCopySuccess(false), 4000);
-                } catch (err) {
-                    setError('Failed to copy to clipboard. Please select and copy manually.');
-                }
-                document.body.removeChild(textArea);
-            };
+                }).catch(() => {
+                    // Fallback
+                    const ta = document.createElement('textarea');
+                    ta.value = fullPrompt;
+                    ta.style.cssText = 'position:fixed;left:-9999px';
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(ta);
+                    setCopySuccess(true);
+                    setTimeout(() => setCopySuccess(false), 4000);
+                });
 
-            const copyToClipboard = () => {
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                    navigator.clipboard.writeText(generatedPrompt).then(() => {
-                        setCopySuccess(true);
-                        setTimeout(() => setCopySuccess(false), 4000);
-                    }).catch(() => fallbackCopyToClipboard(generatedPrompt));
-                } else {
-                    fallbackCopyToClipboard(generatedPrompt);
-                }
+                setIsGenerating(false);
             };
 
             const downloadPrompt = () => {
@@ -555,10 +575,8 @@ Please write the complete proposal now. Format it professionally with clear sect
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `grant-proposal-prompt-${proposalType}-${new Date().toISOString().slice(0,10)}.txt`;
-                document.body.appendChild(a);
+                a.download = `grant-prompt-${proposalType}-${Date.now()}.txt`;
                 a.click();
-                document.body.removeChild(a);
                 URL.revokeObjectURL(url);
             };
 
@@ -568,342 +586,328 @@ Please write the complete proposal now. Format it professionally with clear sect
                 return acc;
             }, {});
 
+            const currentStep = activeTab === 'input' ? 1 : activeTab === 'details' ? 2 : 3;
+
             return (
-                <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-100 p-4 md:p-6">
+                <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 p-4 md:p-6">
                     <div className="max-w-5xl mx-auto">
                         {/* Header */}
                         <div className="text-center mb-6">
-                            <h1 className="text-3xl md:text-4xl font-bold text-slate-800 mb-2">
-                                Grant Proposal Writer
+                            <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+                                Grant Proposal Writer <span className="text-indigo-400">Pro</span>
                             </h1>
-                            <p className="text-slate-600">
-                                Transform grant documents into professional, submission-ready proposals
+                            <p className="text-slate-400">
+                                AI-powered grant writing with 25+ years of expertise built-in
                             </p>
+                            {savedNotice && (
+                                <span className="inline-block mt-2 text-green-400 text-sm animate-pulse">
+                                    ✓ Progress saved
+                                </span>
+                            )}
+                        </div>
+
+                        {/* Progress Bar */}
+                        <div className="bg-slate-800/50 rounded-xl p-4 mb-4">
+                            <ProgressBar currentStep={currentStep} totalSteps={3} />
+                            <div className="flex justify-between text-xs text-slate-400">
+                                <span>Grant Documents</span>
+                                <span>Organization Info</span>
+                                <span>Generated Prompt</span>
+                            </div>
                         </div>
 
                         {/* Tab Navigation */}
-                        <div className="flex mb-4 bg-white rounded-lg p-1 shadow-sm">
-                            <button
-                                onClick={() => setActiveTab('input')}
-                                className={`flex-1 py-2 px-4 rounded-md font-medium transition-all ${
-                                    activeTab === 'input'
-                                        ? 'bg-indigo-600 text-white'
-                                        : 'text-slate-600 hover:bg-slate-100'
-                                }`}
-                            >
-                                1. Input Documents
-                            </button>
-                            <button
-                                onClick={() => setActiveTab('details')}
-                                className={`flex-1 py-2 px-4 rounded-md font-medium transition-all ${
-                                    activeTab === 'details'
-                                        ? 'bg-indigo-600 text-white'
-                                        : 'text-slate-600 hover:bg-slate-100'
-                                }`}
-                            >
-                                2. Organization Details
-                            </button>
-                            <button
-                                onClick={() => setActiveTab('output')}
-                                className={`flex-1 py-2 px-4 rounded-md font-medium transition-all ${
-                                    activeTab === 'output'
-                                        ? 'bg-indigo-600 text-white'
-                                        : 'text-slate-600 hover:bg-slate-100'
-                                }`}
-                                disabled={!generatedPrompt}
-                            >
-                                3. Generated Prompt
-                            </button>
+                        <div className="flex mb-4 bg-slate-800 rounded-lg p-1">
+                            {[
+                                { id: 'input', label: '1. Documents', icon: '📄' },
+                                { id: 'details', label: '2. Details', icon: '🏢' },
+                                { id: 'output', label: '3. Output', icon: '✨' }
+                            ].map(tab => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    disabled={tab.id === 'output' && !generatedPrompt}
+                                    className={`flex-1 py-2.5 px-3 rounded-md font-medium transition-all text-sm ${
+                                        activeTab === tab.id
+                                            ? 'bg-indigo-600 text-white'
+                                            : 'text-slate-400 hover:text-white hover:bg-slate-700'
+                                    } disabled:opacity-40 disabled:cursor-not-allowed`}
+                                >
+                                    <span className="hidden sm:inline">{tab.icon} </span>{tab.label}
+                                </button>
+                            ))}
                         </div>
 
                         {/* Main Card */}
-                        <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8">
-
-                            {/* Tab 1: Input Documents */}
+                        <div className="bg-white rounded-2xl shadow-2xl p-6 md:p-8">
+                            {/* Tab 1: Documents */}
                             {activeTab === 'input' && (
                                 <div>
-                                    {/* Input Mode Toggle */}
-                                    <div className="mb-6">
-                                        <div className="flex items-center justify-between mb-3">
-                                            <label className="text-sm font-semibold text-slate-700">
-                                                Input Method
-                                            </label>
-                                            <button
-                                                onClick={clearAll}
-                                                className="text-sm text-red-500 hover:text-red-700"
-                                            >
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h2 className="text-lg font-bold text-slate-800">Grant Documents</h2>
+                                        <div className="flex gap-2">
+                                            <button onClick={() => setShowSample(true)} className="text-sm text-indigo-600 hover:text-indigo-800">
+                                                View Sample RFP
+                                            </button>
+                                            <button onClick={clearAll} className="text-sm text-red-500 hover:text-red-700">
                                                 Clear All
                                             </button>
                                         </div>
-                                        <div className="flex gap-2 mb-4">
-                                            <button
-                                                onClick={() => setInputMode('paste')}
-                                                className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all ${
-                                                    inputMode === 'paste'
-                                                        ? 'bg-indigo-600 text-white shadow-md'
-                                                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                                                }`}
-                                            >
-                                                Paste Text (Recommended)
-                                            </button>
-                                            <button
-                                                onClick={() => setInputMode('upload')}
-                                                className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all ${
-                                                    inputMode === 'upload'
-                                                        ? 'bg-indigo-600 text-white shadow-md'
-                                                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                                                }`}
-                                            >
-                                                Upload Files
-                                            </button>
-                                        </div>
-
-                                        {/* Paste Mode */}
-                                        {inputMode === 'paste' && (
-                                            <div>
-                                                <textarea
-                                                    value={pastedText}
-                                                    onChange={(e) => setPastedText(e.target.value)}
-                                                    placeholder="Paste your grant documents here. Include:
-- RFP/Call for Proposals text
-- Eligibility requirements
-- Evaluation criteria and scoring
-- Required sections and format guidelines
-- Submission deadlines and instructions
-- Any annexes or additional guidelines..."
-                                                    className="w-full h-64 p-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-y font-mono text-sm"
-                                                />
-                                                <div className="flex justify-between mt-2 text-sm text-slate-500">
-                                                    <span>{pastedText.length.toLocaleString()} characters</span>
-                                                    <span>{pastedText.split(/\s+/).filter(w => w).length.toLocaleString()} words</span>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* Upload Mode */}
-                                        {inputMode === 'upload' && (
-                                            <div>
-                                                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 text-sm text-amber-800">
-                                                    <strong>Note:</strong> For best results, use plain text (.txt) files or copy and paste content directly. PDF and Word files may not extract correctly in the browser.
-                                                </div>
-                                                <div
-                                                    ref={dropZoneRef}
-                                                    onClick={() => fileInputRef.current?.click()}
-                                                    onDragEnter={handleDragIn}
-                                                    onDragLeave={handleDragOut}
-                                                    onDragOver={handleDrag}
-                                                    onDrop={handleDrop}
-                                                    className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
-                                                        isDragging
-                                                            ? 'border-indigo-500 bg-indigo-50'
-                                                            : 'border-slate-300 hover:border-indigo-400 hover:bg-slate-50'
-                                                    }`}
-                                                >
-                                                    <div className="text-4xl mb-2">
-                                                        {isDragging ? '📥' : '📁'}
-                                                    </div>
-                                                    <p className="text-slate-600 mb-1">
-                                                        {isDragging ? 'Drop files here' : 'Click or drag files to upload'}
-                                                    </p>
-                                                    <p className="text-sm text-slate-400">
-                                                        Text files (.txt) recommended | Max 5MB per file
-                                                    </p>
-                                                </div>
-                                                <input
-                                                    ref={fileInputRef}
-                                                    type="file"
-                                                    multiple
-                                                    accept=".pdf,.doc,.docx,.txt,.rtf"
-                                                    onChange={handleFileChange}
-                                                    className="hidden"
-                                                />
-
-                                                {/* File List */}
-                                                {files.length > 0 && (
-                                                    <div className="mt-4 space-y-2">
-                                                        {files.map((file, index) => (
-                                                            <div key={index} className={`p-3 rounded-lg ${file.warning ? 'bg-amber-50' : 'bg-green-50'}`}>
-                                                                <div className="flex items-center justify-between">
-                                                                    <div className="flex items-center gap-2">
-                                                                        <span className={file.warning ? 'text-amber-600' : 'text-green-600'}>
-                                                                            {file.warning ? '⚠️' : '✓'}
-                                                                        </span>
-                                                                        <span className="text-sm font-medium text-slate-700">{file.name}</span>
-                                                                        <span className="text-xs text-slate-400">({formatFileSize(file.size)})</span>
-                                                                    </div>
-                                                                    <div className="flex items-center gap-2">
-                                                                        <button
-                                                                            onClick={(e) => { e.stopPropagation(); setShowPreview(showPreview === index ? false : index); }}
-                                                                            className="text-indigo-500 hover:text-indigo-700 text-sm"
-                                                                        >
-                                                                            {showPreview === index ? 'Hide' : 'Preview'}
-                                                                        </button>
-                                                                        <button
-                                                                            onClick={(e) => { e.stopPropagation(); removeFile(index); }}
-                                                                            className="text-red-500 hover:text-red-700 text-sm"
-                                                                        >
-                                                                            Remove
-                                                                        </button>
-                                                                    </div>
-                                                                </div>
-                                                                {file.warning && (
-                                                                    <p className="text-xs text-amber-600 mt-1">{file.warning}</p>
-                                                                )}
-                                                                {showPreview === index && (
-                                                                    <pre className="mt-2 p-2 bg-white rounded text-xs text-slate-600 max-h-32 overflow-auto font-mono">
-                                                                        {file.content.substring(0, 2000)}
-                                                                        {file.content.length > 2000 && '...'}
-                                                                    </pre>
-                                                                )}
-                                                            </div>
-                                                        ))}
-                                                        <div className="text-sm text-slate-500 mt-2">
-                                                            Total: {getCharacterCount().toLocaleString()} characters
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
                                     </div>
 
-                                    {/* Proposal Type Selection */}
-                                    <div className="mb-6">
-                                        <label className="block text-sm font-semibold text-slate-700 mb-3">
+                                    {/* Sample Modal */}
+                                    {showSample && (
+                                        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                                            <div className="bg-white rounded-xl max-w-2xl w-full max-h-[80vh] overflow-auto p-6">
+                                                <div className="flex justify-between items-center mb-4">
+                                                    <h3 className="font-bold text-lg">Sample RFP Format</h3>
+                                                    <button onClick={() => setShowSample(false)} className="text-slate-400 hover:text-slate-600">✕</button>
+                                                </div>
+                                                <pre className="bg-slate-100 p-4 rounded-lg text-sm whitespace-pre-wrap font-mono">{SAMPLE_RFP}</pre>
+                                                <div className="flex gap-2 mt-4">
+                                                    <button onClick={loadSample} className="flex-1 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                                                        Use This Sample
+                                                    </button>
+                                                    <button onClick={() => setShowSample(false)} className="flex-1 py-2 bg-slate-200 rounded-lg hover:bg-slate-300">
+                                                        Close
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Input Mode Toggle */}
+                                    <div className="flex gap-2 mb-4">
+                                        <button
+                                            onClick={() => setInputMode('paste')}
+                                            className={`flex-1 py-2.5 px-4 rounded-lg font-medium transition-all ${
+                                                inputMode === 'paste' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                            }`}
+                                        >
+                                            ✏️ Paste Text
+                                        </button>
+                                        <button
+                                            onClick={() => setInputMode('upload')}
+                                            className={`flex-1 py-2.5 px-4 rounded-lg font-medium transition-all ${
+                                                inputMode === 'upload' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                            }`}
+                                        >
+                                            📁 Upload Files
+                                        </button>
+                                    </div>
+
+                                    {inputMode === 'paste' ? (
+                                        <div>
+                                            <textarea
+                                                value={pastedText}
+                                                onChange={(e) => setPastedText(e.target.value)}
+                                                placeholder="Paste your RFP, grant guidelines, eligibility criteria, evaluation rubric, and any other relevant documents here...
+
+The more detail you provide, the better your proposal will be!"
+                                                className="w-full h-56 p-4 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-y font-mono text-sm"
+                                            />
+                                            <div className="flex justify-between mt-2 text-sm text-slate-500">
+                                                <span>{pastedText.length.toLocaleString()} characters</span>
+                                                <span>{pastedText.split(/\s+/).filter(w => w).length.toLocaleString()} words</span>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div>
+                                            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 text-sm text-amber-800">
+                                                <strong>Tip:</strong> Plain text (.txt) files work best. For PDF/Word, copy-paste is recommended.
+                                            </div>
+                                            <div
+                                                onClick={() => fileInputRef.current?.click()}
+                                                onDragEnter={handleDragIn}
+                                                onDragLeave={handleDragOut}
+                                                onDragOver={handleDrag}
+                                                onDrop={handleDrop}
+                                                className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
+                                                    isDragging ? 'border-indigo-500 bg-indigo-50' : 'border-slate-300 hover:border-indigo-400'
+                                                }`}
+                                            >
+                                                <div className="text-3xl mb-2">{isDragging ? '📥' : '📁'}</div>
+                                                <p className="text-slate-600">{isDragging ? 'Drop files here' : 'Click or drag to upload'}</p>
+                                            </div>
+                                            <input ref={fileInputRef} type="file" multiple accept=".txt,.pdf,.doc,.docx" onChange={handleFileChange} className="hidden" />
+                                            {files.length > 0 && (
+                                                <div className="mt-4 space-y-2">
+                                                    {files.map((file, i) => (
+                                                        <div key={i} className="flex items-center justify-between bg-slate-50 p-3 rounded-lg">
+                                                            <span className="text-sm">{file.warning ? '⚠️' : '✓'} {file.name}</span>
+                                                            <button onClick={() => setFiles(files.filter((_, j) => j !== i))} className="text-red-500 text-sm">Remove</button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* Proposal Type */}
+                                    <div className="mt-6">
+                                        <label className="block text-sm font-semibold text-slate-700 mb-2">
                                             Proposal Type
+                                            <Tooltip text="Select the type that best matches your grant opportunity">
+                                                <span className="ml-1 text-slate-400 cursor-help">ⓘ</span>
+                                            </Tooltip>
                                         </label>
                                         <select
                                             value={proposalType}
                                             onChange={(e) => setProposalType(e.target.value)}
-                                            className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                            className="w-full p-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500"
                                         >
                                             {Object.entries(groupedTypes).map(([category, types]) => (
-                                                <optgroup key={category} label={`── ${category} ──`}>
+                                                <optgroup key={category} label={`─ ${category} ─`}>
                                                     {types.map(type => (
-                                                        <option key={type.value} value={type.value}>
-                                                            {type.label}
-                                                        </option>
+                                                        <option key={type.value} value={type.value}>{type.label}</option>
                                                     ))}
                                                 </optgroup>
                                             ))}
                                         </select>
                                     </div>
 
-                                    <button
-                                        onClick={() => setActiveTab('details')}
-                                        className="w-full py-3 px-6 bg-slate-100 text-slate-700 font-medium rounded-xl hover:bg-slate-200 transition-all"
-                                    >
-                                        Next: Organization Details →
-                                    </button>
+                                    <div className="flex gap-3 mt-6">
+                                        <button
+                                            onClick={() => setActiveTab('details')}
+                                            className="flex-1 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition-all"
+                                        >
+                                            Continue to Details →
+                                        </button>
+                                        <button
+                                            onClick={generatePrompt}
+                                            disabled={getCharCount() < 50}
+                                            className="py-3 px-6 bg-slate-100 text-slate-700 font-medium rounded-xl hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            Quick Generate
+                                        </button>
+                                    </div>
                                 </div>
                             )}
 
-                            {/* Tab 2: Organization Details */}
+                            {/* Tab 2: Details */}
                             {activeTab === 'details' && (
                                 <div>
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h2 className="text-lg font-bold text-slate-800">Organization Details</h2>
+                                        <div className="text-sm text-slate-500">
+                                            Completion: <span className="font-semibold text-indigo-600">{getCompletionPercent()}%</span>
+                                        </div>
+                                    </div>
                                     <p className="text-sm text-slate-500 mb-6">
-                                        Provide details about your organization to personalize the proposal. All fields are optional but recommended.
+                                        More details = better customized proposal. All fields optional but recommended.
                                     </p>
 
-                                    <div className="grid md:grid-cols-2 gap-4 mb-6">
+                                    {/* Project Title - Important! */}
+                                    <div className="mb-6 p-4 bg-indigo-50 rounded-xl">
+                                        <label className="block text-sm font-semibold text-indigo-800 mb-2">
+                                            Project Title (Important!)
+                                            <Tooltip text="A compelling title captures attention and communicates your project's essence">
+                                                <span className="ml-1 cursor-help">ⓘ</span>
+                                            </Tooltip>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={projectTitle}
+                                            onChange={(e) => setProjectTitle(e.target.value)}
+                                            placeholder="e.g., 'Empowering Rural Women Through Climate-Smart Agriculture'"
+                                            className="w-full p-3 border-2 border-indigo-200 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                                        />
+                                    </div>
+
+                                    <div className="grid md:grid-cols-2 gap-4 mb-4">
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-700 mb-1">
-                                                Organization Name
-                                            </label>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Organization Name</label>
                                             <input
                                                 type="text"
                                                 value={orgDetails.name}
                                                 onChange={(e) => setOrgDetails({...orgDetails, name: e.target.value})}
-                                                placeholder="e.g., Global Health Initiative"
-                                                className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                                placeholder="Your Organization Name"
+                                                className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-700 mb-1">
-                                                Geographic Location/Focus
-                                            </label>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Geographic Focus</label>
                                             <input
                                                 type="text"
                                                 value={orgDetails.location}
                                                 onChange={(e) => setOrgDetails({...orgDetails, location: e.target.value})}
-                                                placeholder="e.g., Sub-Saharan Africa, Kenya"
-                                                className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                                placeholder="e.g., East Africa, Kenya, Nairobi County"
+                                                className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-700 mb-1">
-                                                Budget Request
-                                            </label>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Budget Request</label>
                                             <input
                                                 type="text"
                                                 value={orgDetails.budgetRequest}
                                                 onChange={(e) => setOrgDetails({...orgDetails, budgetRequest: e.target.value})}
-                                                placeholder="e.g., $500,000 USD"
-                                                className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                                placeholder="e.g., $150,000 USD"
+                                                className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-medium text-slate-700 mb-1">
-                                                Project Duration
-                                            </label>
+                                            <label className="block text-sm font-medium text-slate-700 mb-1">Project Duration</label>
                                             <input
                                                 type="text"
                                                 value={orgDetails.projectDuration}
                                                 onChange={(e) => setOrgDetails({...orgDetails, projectDuration: e.target.value})}
-                                                placeholder="e.g., 24 months"
-                                                className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                                placeholder="e.g., 18 months"
+                                                className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
                                             />
                                         </div>
                                     </div>
 
                                     <div className="mb-4">
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">
-                                            Organization Mission
-                                        </label>
-                                        <textarea
-                                            value={orgDetails.mission}
-                                            onChange={(e) => setOrgDetails({...orgDetails, mission: e.target.value})}
-                                            placeholder="Brief description of your organization's mission and focus areas..."
-                                            className="w-full h-20 p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-y"
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">Target Beneficiaries</label>
+                                        <input
+                                            type="text"
+                                            value={orgDetails.beneficiaries}
+                                            onChange={(e) => setOrgDetails({...orgDetails, beneficiaries: e.target.value})}
+                                            placeholder="e.g., 5,000 smallholder farmers (60% women) in 3 districts"
+                                            className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
                                         />
                                     </div>
 
                                     <div className="mb-4">
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">
-                                            Target Beneficiaries
-                                        </label>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">Organization Mission & Background</label>
                                         <textarea
-                                            value={orgDetails.beneficiaries}
-                                            onChange={(e) => setOrgDetails({...orgDetails, beneficiaries: e.target.value})}
-                                            placeholder="Describe your target beneficiaries, numbers, and selection criteria..."
-                                            className="w-full h-20 p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-y"
+                                            value={orgDetails.mission}
+                                            onChange={(e) => setOrgDetails({...orgDetails, mission: e.target.value})}
+                                            placeholder="Brief description of your organization's mission, history, and key achievements..."
+                                            className="w-full h-20 p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 resize-y"
+                                        />
+                                    </div>
+
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">Relevant Experience</label>
+                                        <textarea
+                                            value={orgDetails.experience}
+                                            onChange={(e) => setOrgDetails({...orgDetails, experience: e.target.value})}
+                                            placeholder="Previous similar projects, grants managed, success metrics..."
+                                            className="w-full h-20 p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 resize-y"
                                         />
                                     </div>
 
                                     <div className="mb-6">
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">
-                                            Additional Context
-                                        </label>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">Additional Context</label>
                                         <textarea
                                             value={additionalContext}
                                             onChange={(e) => setAdditionalContext(e.target.value)}
-                                            placeholder="Any other relevant information: past grants, partnerships, special requirements, specific outcomes you want to achieve..."
-                                            className="w-full h-24 p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-y"
+                                            placeholder="Partners, special requirements, specific outcomes, innovation aspects..."
+                                            className="w-full h-20 p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 resize-y"
                                         />
                                     </div>
 
                                     <div className="flex gap-3">
-                                        <button
-                                            onClick={() => setActiveTab('input')}
-                                            className="flex-1 py-3 px-6 bg-slate-100 text-slate-700 font-medium rounded-xl hover:bg-slate-200 transition-all"
-                                        >
+                                        <button onClick={() => setActiveTab('input')} className="py-3 px-6 bg-slate-100 text-slate-700 font-medium rounded-xl hover:bg-slate-200">
                                             ← Back
                                         </button>
                                         <button
                                             onClick={generatePrompt}
-                                            disabled={isGenerating || getCharacterCount() === 0}
-                                            className="flex-[2] py-3 px-6 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                                            disabled={getCharCount() < 50}
+                                            className="flex-1 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                                         >
-                                            {isGenerating ? 'Generating...' : 'Generate Proposal Prompt'}
+                                            ✨ Generate Proposal Prompt
                                         </button>
                                     </div>
                                 </div>
@@ -914,118 +918,86 @@ Please write the complete proposal now. Format it professionally with clear sect
                                 <div>
                                     {generatedPrompt ? (
                                         <>
-                                            {/* Success Message */}
                                             {copySuccess && (
-                                                <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 flex items-center gap-2">
-                                                    <span className="text-xl">✅</span>
-                                                    <span>Prompt copied to clipboard! Open Claude and paste it to generate your proposal.</span>
+                                                <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700">
+                                                    ✅ Copied to clipboard! Paste into Claude to generate your proposal.
                                                 </div>
                                             )}
 
-                                            <div className="flex items-center justify-between mb-3">
+                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                                                 <div>
-                                                    <h3 className="text-lg font-semibold text-slate-700">Generated Prompt</h3>
-                                                    <p className="text-sm text-slate-500">
-                                                        {generatedPrompt.length.toLocaleString()} characters | {getProposalTypeLabel()}
-                                                    </p>
+                                                    <h3 className="text-lg font-bold text-slate-800">Your Grant Writing Prompt</h3>
+                                                    <p className="text-sm text-slate-500">{generatedPrompt.length.toLocaleString()} chars | {getProposalTypeLabel()}</p>
                                                 </div>
                                                 <div className="flex gap-2">
                                                     <button
-                                                        onClick={copyToClipboard}
-                                                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all text-sm font-medium"
+                                                        onClick={() => navigator.clipboard?.writeText(generatedPrompt).then(() => { setCopySuccess(true); setTimeout(() => setCopySuccess(false), 3000); })}
+                                                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium"
                                                     >
-                                                        Copy to Clipboard
+                                                        📋 Copy
                                                     </button>
-                                                    <button
-                                                        onClick={downloadPrompt}
-                                                        className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-all text-sm font-medium"
-                                                    >
-                                                        Download
+                                                    <button onClick={downloadPrompt} className="px-4 py-2 bg-slate-100 rounded-lg hover:bg-slate-200 text-sm font-medium">
+                                                        ⬇️ Download
                                                     </button>
                                                 </div>
                                             </div>
 
-                                            <div className="bg-slate-900 rounded-xl p-4 max-h-[400px] overflow-y-auto">
-                                                <pre className="text-slate-100 text-sm whitespace-pre-wrap font-mono leading-relaxed">
-                                                    {generatedPrompt}
-                                                </pre>
+                                            <div className="bg-slate-900 rounded-xl p-4 max-h-[350px] overflow-y-auto">
+                                                <pre className="text-slate-100 text-xs sm:text-sm whitespace-pre-wrap font-mono leading-relaxed">{generatedPrompt}</pre>
                                             </div>
 
-                                            {/* Next Steps */}
-                                            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-xl">
-                                                <h4 className="font-semibold text-blue-800 mb-2">Next Steps:</h4>
-                                                <ol className="text-blue-700 text-sm space-y-2 list-decimal list-inside">
-                                                    <li>Open <a href="https://claude.ai" target="_blank" rel="noopener noreferrer" className="underline">claude.ai</a> in a new tab</li>
-                                                    <li>Start a new conversation</li>
-                                                    <li>Paste the prompt (Ctrl+V / Cmd+V)</li>
-                                                    <li>Press Enter and wait for your complete proposal</li>
-                                                    <li>Review, customize, and refine as needed</li>
+                                            <div className="mt-4 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-xl">
+                                                <h4 className="font-bold text-indigo-800 mb-2">🚀 Next Steps:</h4>
+                                                <ol className="text-indigo-700 text-sm space-y-1.5 list-decimal list-inside">
+                                                    <li>Open <a href="https://claude.ai" target="_blank" rel="noopener noreferrer" className="underline font-medium">claude.ai</a></li>
+                                                    <li>Start new conversation, paste prompt (Ctrl+V)</li>
+                                                    <li>Wait for complete proposal generation</li>
+                                                    <li>Review, customize with specific data</li>
+                                                    <li>Format according to funder requirements</li>
                                                 </ol>
                                             </div>
 
-                                            <button
-                                                onClick={() => setActiveTab('input')}
-                                                className="mt-4 w-full py-3 px-6 bg-slate-100 text-slate-700 font-medium rounded-xl hover:bg-slate-200 transition-all"
-                                            >
+                                            <button onClick={() => { setActiveTab('input'); setGeneratedPrompt(''); }} className="mt-4 w-full py-3 bg-slate-100 text-slate-700 font-medium rounded-xl hover:bg-slate-200">
                                                 ← Create Another Proposal
                                             </button>
                                         </>
                                     ) : (
                                         <div className="text-center py-12">
-                                            <div className="text-4xl mb-4">📝</div>
-                                            <h3 className="text-lg font-semibold text-slate-700 mb-2">No Prompt Generated Yet</h3>
-                                            <p className="text-slate-500 mb-4">Input your grant documents and generate a prompt first.</p>
-                                            <button
-                                                onClick={() => setActiveTab('input')}
-                                                className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all"
-                                            >
-                                                Go to Input
+                                            <div className="text-5xl mb-4">📝</div>
+                                            <h3 className="text-xl font-bold text-slate-700 mb-2">No Prompt Yet</h3>
+                                            <p className="text-slate-500 mb-4">Add grant documents and generate your prompt.</p>
+                                            <button onClick={() => setActiveTab('input')} className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                                                Get Started
                                             </button>
                                         </div>
                                     )}
                                 </div>
                             )}
 
-                            {/* Error Message */}
                             {error && (
-                                <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 flex items-start gap-2">
-                                    <span>⚠️</span>
-                                    <span>{error}</span>
+                                <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700">
+                                    ⚠️ {error}
                                 </div>
                             )}
                         </div>
 
-                        {/* Features Section */}
-                        <div className="mt-6 grid md:grid-cols-4 gap-3">
-                            <div className="bg-white p-4 rounded-xl shadow-sm">
-                                <h3 className="font-semibold text-slate-800 mb-1 text-sm">Document Analysis</h3>
-                                <p className="text-xs text-slate-600">
-                                    Extracts requirements, criteria & priorities
-                                </p>
-                            </div>
-                            <div className="bg-white p-4 rounded-xl shadow-sm">
-                                <h3 className="font-semibold text-slate-800 mb-1 text-sm">30+ Proposal Types</h3>
-                                <p className="text-xs text-slate-600">
-                                    Climate, SME, humanitarian & more
-                                </p>
-                            </div>
-                            <div className="bg-white p-4 rounded-xl shadow-sm">
-                                <h3 className="font-semibold text-slate-800 mb-1 text-sm">Expert Grant Writing</h3>
-                                <p className="text-xs text-slate-600">
-                                    20+ years expertise built-in
-                                </p>
-                            </div>
-                            <div className="bg-white p-4 rounded-xl shadow-sm">
-                                <h3 className="font-semibold text-slate-800 mb-1 text-sm">Complete Sections</h3>
-                                <p className="text-xs text-slate-600">
-                                    All standard proposal components
-                                </p>
-                            </div>
+                        {/* Features */}
+                        <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3">
+                            {[
+                                { title: '45+ Grant Types', desc: 'All sectors covered' },
+                                { title: '25+ Years Expertise', desc: 'Built into AI prompt' },
+                                { title: 'Auto-Save', desc: 'Never lose progress' },
+                                { title: 'Funder-Aligned', desc: 'Matches their language' }
+                            ].map((f, i) => (
+                                <div key={i} className="bg-slate-800/50 p-4 rounded-xl text-center">
+                                    <h3 className="font-semibold text-white text-sm">{f.title}</h3>
+                                    <p className="text-xs text-slate-400">{f.desc}</p>
+                                </div>
+                            ))}
                         </div>
 
-                        {/* Footer */}
-                        <div className="mt-6 text-center text-slate-400 text-sm">
-                            <p>Grant Proposal Writer v2.0</p>
+                        <div className="mt-6 text-center text-slate-500 text-sm">
+                            Grant Proposal Writer Pro v3.0
                         </div>
                     </div>
                 </div>

@@ -1,190 +1,154 @@
-# Grant Proposal Writer
+# Grant Proposal Writer Pro
 
-A comprehensive AI-powered tool for generating professional, submission-ready grant proposals. Upload your grant documents (RFPs, guidelines, requirements) and receive a customized prompt that generates complete grant proposals tailored to your specific funding opportunity.
+A professional-grade AI-powered tool for generating comprehensive, submission-ready grant proposals. Upload your grant documents and receive an expertly crafted prompt that leverages 25+ years of grant writing expertise to generate winning proposals.
 
-## What's New in v2.0
+## What's New in v3.0
 
-- **Improved UI/UX**: Tab-based navigation for better workflow
-- **Drag & Drop Support**: Easily drag files into the upload area
-- **File Content Preview**: Verify uploaded documents loaded correctly
-- **Character & Word Count**: Track content length in real-time
-- **Clear All Functionality**: Reset form with one click
-- **Organization Details Form**: Structured fields for organization information
-- **Better Error Handling**: Clear warnings for PDF/Word file limitations
-- **Clipboard Fallback**: Works in more browsers
-- **30+ Proposal Types**: Additional grant categories added
+### Major Enhancements
+- **Professional Dark Theme UI** - Modern, polished interface
+- **Visual Progress Indicator** - Track your workflow with step indicators
+- **Auto-Save to LocalStorage** - Never lose your work
+- **Sample RFP Template** - See example format to guide your input
+- **Project Title Field** - Dedicated field for compelling titles
+- **Quick Generate Option** - Skip details for fast output
+- **Completion Percentage** - See how complete your application is
+- **Help Tooltips** - Contextual guidance throughout
+- **45+ Grant Types** - Expanded categories with subcategories
+
+### Enhanced AI Prompt
+- **25+ Years Expertise** - Upgraded from 20+ years
+- **Grant Review Panel Experience** - USAID, EU, foundations
+- **Critical Analysis Phase** - Structured document analysis
+- **Sector-Specific Excellence** - Healthcare, Education, Climate, SME
+- **Quality Assurance Checklist** - Built-in verification
 
 ## Features
 
-### Document Processing
-- **File Upload**: Upload text files (PDF/Word have limited browser support)
-- **Paste Text**: Directly paste grant document content (recommended)
-- **Drag & Drop**: Drag files directly into the upload area
-- **File Preview**: Preview uploaded file content to verify extraction
-- **Multi-Document Support**: Process multiple grant documents simultaneously
-
-### 30+ Specialized Proposal Types
+### 45+ Specialized Grant Types
 
 **General**
-- Standard Grant Proposal
-- Research Grant
-- Nonprofit Program Grant
-- Education/School Grant
-- Community Development Grant
-- Healthcare Grant
-- Arts & Culture Grant
-- Technology Grant
+- Standard Grant Proposal, Research Grant, Nonprofit Program, Community Development
 
 **Climate & Environment**
-- Climate Initiative Grant
-- Renewable Energy Grant
-- Water & Sanitation Grant
-- Environmental Grant
-- Biodiversity Conservation Grant
+- Climate Initiative, Renewable Energy, Water & Sanitation, Environmental Conservation, Biodiversity Protection, Waste Management
 
-**Business & Economic Development**
-- SME Development Grant
-- Social Enterprise Grant
-- Financial Inclusion Grant
-- Tourism Development Grant
-- Trade & Export Development Grant
+**Business & Economic**
+- SME Development, Social Enterprise, Financial Inclusion, Tourism, Trade & Export, Startup & Innovation
+
+**Education** (NEW subcategories)
+- K-12 Education, Higher Education, Vocational Training, STEM Education, Literacy Programs
+
+**Healthcare** (NEW subcategories)
+- Primary Healthcare, Maternal & Child Health, Mental Health, Disease Prevention, Nutrition & Food Security
 
 **Social Development**
-- Women Empowerment Grant
-- Youth Development Grant
-- Capacity Building Grant
-- Governance & Democracy Grant
-- Human Rights Grant
-- Disability Inclusion Grant
+- Women Empowerment, Youth Development, Capacity Building, Governance & Democracy, Human Rights, Disability Inclusion, Refugee & Migration
 
-**Infrastructure & Development**
-- Agriculture & Rural Development Grant
-- Infrastructure Development Grant
-- Disaster Relief & Recovery Grant
-- Humanitarian Aid Grant
-- Urban Development Grant
-- Housing & Shelter Grant
+**Infrastructure**
+- Agriculture Development, Infrastructure, Disaster Relief, Humanitarian Aid, Urban Development, Housing & Shelter, Rural Development
 
 **Other**
-- Sports & Recreation Grant
-- Media & Journalism Grant
-- Digital Transformation Grant
+- Arts & Culture, Sports & Recreation, Media & Journalism, Digital Transformation, Technology & Innovation
 
-### Comprehensive Proposal Sections
+### Professional Proposal Structure
 
-The AI grant writer generates all standard sections including:
+The AI generates comprehensive proposals with:
 
-1. **Cover Page & Executive Summary** - Project title, funding request, problem statement, solution overview
-2. **Organizational Background** - History, capacity, track record, governance
-3. **Needs Assessment** - Data-driven problem analysis with evidence, stakeholder analysis
-4. **Project Description** - Theory of change, SMART objectives, LogFrame, activities
-5. **Implementation Plan** - Timeline, work plan, resource allocation
-6. **Monitoring & Evaluation** - KPIs, data collection, evaluation design
-7. **Sustainability Plan** - Financial, institutional, technical sustainability
-8. **Budget Narrative** - Line-item budget with justifications
-9. **Partnerships** - Collaborations, MOUs, community engagement
-10. **Annexes** - Supporting document recommendations
+1. **Cover Page & Executive Summary** - Compelling title, funding request, problem statement, impact metrics
+2. **Organizational Background** - Track record, governance, financial health, staff qualifications
+3. **Needs Assessment** - Data-driven problem analysis, root cause analysis, stakeholder voices
+4. **Project Description** - Theory of Change, LogFrame, SMART objectives, risk matrix
+5. **Implementation Plan** - Work plan, resource allocation, quality assurance
+6. **M&E Framework** - KPIs, indicator reference sheets, evaluation design
+7. **Sustainability Plan** - Financial, institutional, technical sustainability, exit strategy
+8. **Budget & Narrative** - Line-item budget, cost-effectiveness, value for money
+9. **Partnerships** - Partner mapping, coordination mechanisms
 
-### Expert Grant Writing Features
+### Key Features
 
-- Analyzes funder priorities and evaluation criteria
-- Aligns proposal language with funder terminology
-- Uses persuasive, action-oriented writing
-- Includes quantifiable metrics and evidence
-- Addresses all RFP requirements systematically
-- Sector-specific guidance for specialized grants
-- Cross-cutting themes (gender, environment, disability)
-- International donor experience (USAID, World Bank, EU, GIZ, DFID/FCDO)
+| Feature | Description |
+|---------|-------------|
+| Auto-Save | Progress saved to browser automatically |
+| Sample RFP | View example format to guide your input |
+| Progress Tracking | Visual indicators show completion status |
+| Quick Generate | Skip organization details for rapid output |
+| Tooltips | Contextual help throughout the interface |
+| Dark Theme | Professional, modern appearance |
+| Mobile Responsive | Works on all device sizes |
 
 ## How to Use
 
 ### Step 1: Input Grant Documents
+- **Paste Text** (Recommended): Copy RFP content directly
+- **Upload Files**: Drag & drop or click to upload (.txt works best)
+- **View Sample**: See example RFP format for guidance
 
-Choose your preferred input method:
+### Step 2: Add Organization Details (Optional but Recommended)
+- Project Title (creates compelling proposal title)
+- Organization Name & Mission
+- Geographic Focus
+- Budget Request & Duration
+- Target Beneficiaries
+- Relevant Experience
 
-**Option A: Paste Text (Recommended)**
-- Copy the full text from your grant documents
-- Paste directly into the text area
-- Include RFP text, eligibility requirements, evaluation criteria
-
-**Option B: Upload Files**
-- Click or drag files into the upload area
-- Best for `.txt` files
-- Note: PDF and Word files have limited extraction in browsers
-
-### Step 2: Organization Details (Optional)
-
-Fill in details about your organization:
-- Organization name
-- Geographic location/focus
-- Budget request
-- Project duration
-- Mission statement
-- Target beneficiaries
-
-### Step 3: Generate Prompt
-
+### Step 3: Generate & Use
 1. Click "Generate Proposal Prompt"
-2. Prompt is automatically copied to your clipboard
-3. Open [claude.ai](https://claude.ai) in a new tab
-4. Paste the prompt and press Enter
-5. Claude generates your complete proposal
+2. Prompt auto-copies to clipboard
+3. Open [claude.ai](https://claude.ai)
+4. Paste and get your complete proposal
 
 ## File Structure
 
 ```
 Grant-Proposal-Writer/
-├── README.md                    # This documentation
-├── grant-proposal-writer.html   # Standalone HTML version (v2.0)
+├── README.md                    # Documentation
+├── grant-proposal-writer.html   # Main application (v3.0)
 └── GrantProposalWriter.jsx      # React component version
 ```
 
 ## Tips for Best Results
 
-1. **Use Paste Text Mode**: Most reliable method for document input
-2. **Include Complete Documents**: Full RFP text, guidelines, evaluation criteria, annexes
-3. **Fill Organization Details**: More context = better customized proposal
-4. **Select Correct Proposal Type**: Enables sector-specific guidance
-5. **Include Budget Parameters**: Mention limits or requirements
-6. **Review Generated Proposal**: Use as strong foundation, customize as needed
+1. **Include Complete RFP**: Full text with eligibility, criteria, required sections
+2. **Add Evaluation Rubric**: If provided, include scoring criteria
+3. **Provide Project Title**: A compelling title improves the entire proposal
+4. **Fill Key Fields**: Budget, duration, beneficiaries help customize output
+5. **Review & Customize**: Use AI output as foundation, add specific data
 
 ## Technical Requirements
 
 - Modern web browser (Chrome, Firefox, Safari, Edge)
 - JavaScript enabled
-- Internet connection (for CDN resources)
-
-## Supported File Types
-
-| Format | Support Level |
-|--------|---------------|
-| .txt   | Full support  |
-| .pdf   | Limited (binary files not extracted) |
-| .docx  | Limited (binary files not extracted) |
-| .rtf   | Partial support |
-
-**Recommendation**: For PDF and Word documents, copy the text content and use the "Paste Text" option.
+- LocalStorage enabled (for auto-save)
 
 ## Changelog
 
-### v2.0 (Current)
-- Tab-based navigation UI
-- Drag and drop file upload
+### v3.0 (Current)
+- Professional dark theme UI
+- Visual progress indicators
+- Auto-save to localStorage
+- Sample RFP modal
+- Project title field
+- Quick generate option
+- Completion percentage tracking
+- Help tooltips
+- 45+ grant types (expanded Education & Healthcare)
+- Enhanced 25+ year expertise prompt
+- Critical analysis phase in prompt
+- Sector-specific excellence guidelines
+- Mobile-responsive improvements
+
+### v2.0
+- Tab-based navigation
+- Drag and drop upload
 - File content preview
-- Character and word count
+- Character/word count
 - Organization details form
-- Clear all functionality
-- Clipboard fallback for older browsers
-- Better file format handling with warnings
-- 8 new proposal types added
-- Enhanced grant writer prompt with more sector guidance
-- Cross-cutting themes integration
+- 33 proposal types
 
 ### v1.0
 - Initial release
-- Basic file upload and paste text
+- Basic upload/paste
 - 24 proposal types
-- Comprehensive grant writer prompt
 
 ## License
 
